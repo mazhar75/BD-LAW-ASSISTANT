@@ -1,0 +1,126 @@
+BD Law Assistant (RAG-Based Legal AI System) System Design Document
+
+1. Introduction
+BD Law Assistant is an AI-powered legal research and assistance platform tailored for Bangladesh. Leveraging Retrieval-Augmented Generation (RAG) with state-of-the-art LLMs, the system delivers contextually accurate, Bengali-language legal guidance, reduces manual research overhead, and democratizes access to statutes, case laws, and legal interpretations.
+Objectives:
+Provide rapid, accurate answers to legal queries in Bengali
+Enable laypersons and professionals to access authoritative legal information
+Streamline ingestion and retrieval of legal documents using vector search
+Support conversational follow-up queries via chatbot interface
+
+2. System Architecture Overview
+[React Frontend]
+       ↓ REST API
+[API Gateway (Spring Boot)]
+       ↓ gRPC/REST
+[Python RAG Microservice]
+   ↕           ↕
+[LangChain Module]    [Vector Store (FAISS/Pinecone/Weaviate)]
+       ↕
+[PostgreSQL (metadata)]
+[Document Storage (AWS S3)]
+
+[Go Service - Background Tasks & Concurrency]
+Components:
+Frontend: React SPA with search bar & chat UI
+API Gateway: Java Spring Boot for auth, routing, logging
+RAG Microservice: Python service orchestrating embedding, retrieval, generation
+Vector Store: High-performance semantic index of text chunks
+Data Storage: PostgreSQL for metadata, S3 for raw documents
+Go Service: Concurrent background processing (ingestion, indexing, monitoring)
+
+3. Component Design
+3.1 Frontend (React.js)
+Modules: SearchBar, ChatWindow, QueryHistory
+Interaction: Issues REST calls to API Gateway
+State Management: Redux for user session, query context
+Styling: Tailwind CSS for responsive design
+3.2 API Gateway (Java Spring Boot)
+Responsibilities:
+User authentication & authorization (JWT)
+Rate limiting & request validation
+Routing to RAG Microservice or auxiliary services
+Centralized logging & metrics (Prometheus)
+Endpoints:
+POST /api/v1/query → handle user questions
+GET /api/v1/history → fetch past queries
+POST /api/v1/documents → upload new legal docs
+3.3 RAG Microservice (Python 3.10+)
+Framework: FastAPI or Flask
+Core Logic: LangChain pipeline
+Embedder: OpenAIEmbeddings or SentenceTransformer
+Retriever: Vector store query (top-k chunks)
+Generator: LLM prompt with retrieved context → produce answer
+Endpoints:
+POST /rag/query → returns answer + source snippets
+POST /rag/ingest → ingest new docs (trigger chunking & embedding)
+3.4 Vector Store
+Options: FAISS (on‑prem), Pinecone or Weaviate (managed)
+Data Model: Stores vectors with metadata (doc_id, chunk_id, text)
+Access Pattern: kNN search to retrieve relevant chunks
+3.5 Data Storage
+PostgreSQL:
+Tables: users, queries, documents, chunks
+Stores metadata and audit logs
+AWS S3:
+Raw document files (PDF, DOCX)
+Versioning enabled
+3.6 Go Service
+Use Cases:
+Ingestion Workers: Concurrent download/cleanup of documents
+Index Updater: Batch or streaming embedding & vector DB update
+Monitoring: Health checks, queue status
+Patterns: Goroutines + Channels for worker pools
+Integration: Message queue (RabbitMQ/Redis) for job dispatch
+
+4. Data Flow
+Document Ingestion: Admin uploads PDF → API Gateway → Go Service enqueues ingest job → Python RAG service chunks & embeds → Vector Store & metadata updated
+User Query: Frontend sends question → API Gateway routes to RAG service → Retriever fetches top-k chunks → Generator produces answer → Gateway returns response with citations
+Follow-up: Chat context passed to RAG pipeline for multi-turn interactions
+
+5. Non‑Functional Requirements
+Scalability: Kubernetes deployment with autoscaling for microservices
+Performance: <500ms for retrieval, <2s for generation
+Security: TLS everywhere, OAuth2/JWT, role‑based access
+Observability: Prometheus, Grafana, ELK stack for logs & metrics
+
+6. Deployment Architecture
+Containers: Docker images for each service
+Orchestration: Kubernetes (EKS/GKE/AKS)
+CI/CD: GitHub Actions pipelines for build, test, deploy
+Secrets: AWS Secrets Manager / Kubernetes secrets
+
+7. Roadmap & Milestones
+Phase
+Duration
+Deliverables
+Initiation
+1 week
+Requirements, infra & architecture docs
+Data Preparation
+1.5 weeks
+Scrapers, chunking, embedding pipeline
+Core Development
+2.5 weeks
+API Gateway, RAG service, vector store
+Frontend Build
+2 weeks
+React UI + API integration
+Testing & QA
+1.5 weeks
+Unit, integration, load testing
+Deployment & OPS
+1 week
+Kubernetes deploy, monitoring setup
+Documentation
+0.5 week
+User guide, API reference
+
+
+8. Future Enhancements
+Support self‑hosted LLMs (e.g., Llama 2, Falcon)
+Add multilingual support (Chittagonian, Sylheti)
+Incorporate advanced analytics (usage trends, topic modeling)
+
+End of Document
+
