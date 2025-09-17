@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BD Laws Crawler - Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .input-group input, .input-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .log-container {
+            background: #1a202c;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 3px 0;
+        }
+
+        .log-entry.success { color: #68d391; }
+        .log-entry.error { color: #fc8181; }
+        .log-entry.info { color: #63b3ed; }
+
+        .recent-acts {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .act-item {
+            background: #f7fafc;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .act-item .act-id {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .act-item .language {
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            background: #e6fffa;
+            color: #234e52;
+        }
+
+        .act-item .language.bn {
+            background: #fef5e7;
+            color: #7d4f07;
+        }
+
+        .storage-stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .storage-stat {
+            text-align: center;
+        }
+
+        .storage-stat .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .running-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #68d391;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ Bangladesh Laws Crawler</h1>
+            <p>Scalable Web Scraper for BD Laws with Bengali Support</p>
+        </div>
+
+        <div class="card">
+            <h2>Control Panel</h2>
+            <div class="control-panel">
+                <div class="input-group">
+                    <label for="start-act">Starting Act Number</label>
+                    <input type="number" id="start-act" min="1" max="1303" value="1" placeholder="1-1303">
+                </div>
+                <div class="input-group">
+                    <label for="end-act">Ending Act Number</label>
+                    <input type="number" id="end-act" min="1" max="1303" value="10" placeholder="1-1303">
+                </div>
+                <div class="input-group">
+                    <label for="language">Language</label>
+                    <select id="language">
+                        <option value="en">English</option>
+                        <option value="bn">বাংলা (Bengali)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="start-btn" class="btn btn-primary" onclick="startCrawling()">
+                    Start Crawling
+                </button>
+                <button id="stop-btn" class="btn btn-danger" onclick="stopCrawling()" disabled>
+                    Stop Crawling
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Live Status <span id="status-indicator"></span></h2>
+            <div class="status-grid">
+                <div class="stat-box">
+                    <div class="label">Status</div>
+                    <div class="value" id="status">Idle</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Current Act</div>
+                    <div class="value" id="current-act">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Completed</div>
+                    <div class="value" id="completed">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Success</div>
+                    <div class="value" id="successful">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Failed</div>
+                    <div class="value" id="failed">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Success Rate</div>
+                    <div class="value" id="success-rate">-</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-bar" style="width: 0%">
+                        0%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Live Log</h2>
+            <div class="log-container" id="log-container">
+                <div class="log-entry info">System ready. Set parameters and click Start Crawling.</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Storage Statistics</h2>
+            <div class="storage-stats">
+                <div class="storage-stat">
+                    <div class="icon">📄</div>
+                    <div><strong id="total-acts">0</strong></div>
+                    <div>Total Acts</div>
+                </div>
+                <div class="storage-stat">
+                    <div class="icon">💾</div>
+                    <div><strong id="total-size">0 MB</strong></div>
+                    <div>Storage Used</div>
+                </div>
+                <div class="storage-stat">
+                    <div class="icon">🇬🇧</div>
+                    <div><strong id="en-count">0</strong></div>
+                    <div>English</div>
+                </div>
+                <div class="storage-stat">
+                    <div class="icon">🇧🇩</div>
+                    <div><strong id="bn-count">0</strong></div>
+                    <div>Bengali</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Recently Crawled</h2>
+            <div class="recent-acts" id="recent-acts">
+                <div class="act-item">No acts crawled yet</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let isRunning = false;
+
+        function startCrawling() {
+            const startAct = document.getElementById('start-act').value;
+            const endAct = document.getElementById('end-act').value;
+            const language = document.getElementById('language').value;
+
+            if (!startAct || !endAct) {
+                alert('Please enter both start and end act numbers');
+                return;
+            }
+
+            if (parseInt(startAct) > parseInt(endAct)) {
+                alert('Start act must be less than or equal to end act');
+                return;
+            }
+
+            fetch('/api/start', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    start: parseInt(startAct),
+                    end: parseInt(endAct),
+                    language: language
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    isRunning = true;
+                    updateButtons();
+                    startMonitoring();
+                    addLog(`Started crawling acts ${startAct} to ${endAct} (${language})`, 'info');
+                }
+            });
+        }
+
+        function stopCrawling() {
+            fetch('/api/stop', {method: 'POST'})
+                .then(response => response.json())
+                .then(data => {
+                    isRunning = false;
+                    updateButtons();
+                    if (eventSource) {
+                        eventSource.close();
+                        eventSource = null;
+                    }
+                    addLog('Crawling stopped', 'info');
+                });
+        }
+
+        function updateButtons() {
+            document.getElementById('start-btn').disabled = isRunning;
+            document.getElementById('stop-btn').disabled = !isRunning;
+        }
+
+        function startMonitoring() {
+            // Start SSE for real-time progress
+            if (eventSource) eventSource.close();
+
+            eventSource = new EventSource('/api/progress');
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.type !== 'heartbeat') {
+                    handleProgressUpdate(data);
+                }
+            };
+
+            // Update status every second
+            updateStatus();
+            setInterval(updateStatus, 1000);
+
+            // Update stats every 5 seconds
+            updateStats();
+            setInterval(updateStats, 5000);
+        }
+
+        function handleProgressUpdate(data) {
+            if (data.status === 'success') {
+                addLog(`✅ Act ${data.act} crawled successfully`, 'success');
+            } else if (data.status === 'failed') {
+                addLog(`❌ Act ${data.act} failed`, 'error');
+            } else if (data.status === 'processing') {
+                addLog(`⚡ Processing Act ${data.act}`, 'info');
+            }
+        }
+
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('status').textContent = data.status || 'Idle';
+                    document.getElementById('current-act').textContent = data.current_act || '-';
+                    document.getElementById('completed').textContent = data.completed || '0';
+                    document.getElementById('successful').textContent = data.successful || '0';
+                    document.getElementById('failed').textContent = data.failed || '0';
+
+                    const successRate = data.success_rate || 0;
+                    document.getElementById('success-rate').textContent = successRate.toFixed(1) + '%';
+
+                    // Update progress bar
+                    if (data.total && data.completed) {
+                        const progress = (data.completed / data.total) * 100;
+                        const progressBar = document.getElementById('progress-bar');
+                        progressBar.style.width = progress + '%';
+                        progressBar.textContent = progress.toFixed(1) + '%';
+                    }
+
+                    // Update status indicator
+                    const indicator = document.getElementById('status-indicator');
+                    if (data.status === 'running') {
+                        indicator.innerHTML = '<span class="running-indicator"></span>';
+                    } else {
+                        indicator.innerHTML = '';
+                    }
+
+                    // Check if crawling finished
+                    if (data.status === 'completed' && isRunning) {
+                        isRunning = false;
+                        updateButtons();
+                        addLog('✨ Crawling completed!', 'success');
+                    }
+                });
+        }
+
+        function updateStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-acts').textContent = data.acts_crawled || '0';
+                    document.getElementById('total-size').textContent = (data.total_size_mb || 0) + ' MB';
+                    document.getElementById('en-count').textContent = data.languages?.en || '0';
+                    document.getElementById('bn-count').textContent = data.languages?.bn || '0';
+                });
+
+            // Update recent acts
+            fetch('/api/recent')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('recent-acts');
+                    if (data.length > 0) {
+                        container.innerHTML = data.map(act => `
+                            <div class="act-item">
+                                <span class="act-id">Act ${act.act_id}</span>
+                                <span class="language ${act.language}">${act.language.toUpperCase()}</span>
+                            </div>
+                        `).join('');
+                    }
+                });
+        }
+
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Initial load
+        updateStats();
+        updateStatus();
+    </script>
+</body>
+</html>
