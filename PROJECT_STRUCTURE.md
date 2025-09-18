@@ -1,121 +1,135 @@
-# BD Law Assistant - Clean Project Structure
+# BD Law Assistant - Project Structure
 
-## 📁 Project Overview
-A scalable legal document scraping and RAG system for Bangladesh laws.
-
-## 🏗️ Current Project Structure
+## 📁 Clean Architecture (Post-Refactoring)
 
 ```
 BD Law Assistant/
 │
-├── 📄 web_crawler_app.py          # Main web UI for crawling
-├── 📄 .env                         # Environment variables
-├── 📄 .env.example                 # Example environment file
-├── 📄 requirements.txt             # Python dependencies
+├── 📁 services/                    # Microservices
+│   ├── 📁 scraper/                # ✅ Data scraping service (Phase 1 Complete)
+│   │   ├── 📁 scrapers/          # Core scraping modules
+│   │   │   ├── 📁 config/        # Configuration management
+│   │   │   ├── 📁 core/          # Firecrawl, Queue, Data validation
+│   │   │   ├── 📁 storage/       # File storage handlers
+│   │   │   ├── 📁 utils/         # Logging utilities
+│   │   │   ├── 📁 validators/    # Content validators
+│   │   │   ├── bd_law_crawler.py # Main crawler orchestrator
+│   │   │   └── scheduler.py      # Automated scheduled tasks
+│   │   ├── 📁 templates/         # Web UI templates
+│   │   ├── web_crawler_app.py    # Flask web interface
+│   │   └── requirements.txt      # Python dependencies
+│   │
+│   ├── 📁 rag/                   # 🚧 RAG service (Phase 2 - Next)
+│   ├── 📁 gateway/               # 📋 API Gateway (Phase 3)
+│   └── 📁 frontend/              # 📋 React frontend (Phase 4)
 │
-├── 📁 scrapers/                    # Core scraping system
-│   ├── 📁 config/
-│   │   ├── settings.py             # Configuration management
-│   │   └── __init__.py
-│   │
-│   ├── 📁 core/
-│   │   ├── firecrawl_client.py    # ✅ FIXED: JSON extraction for BD laws
-│   │   ├── data_validator.py      # Content validation
-│   │   ├── bd_law_crawler.py      # BD law specific crawler
-│   │   └── __init__.py
-│   │
-│   ├── 📁 queue/
-│   │   ├── redis_manager.py       # Redis queue management
-│   │   └── __init__.py
-│   │
-│   ├── 📁 storage/
-│   │   ├── file_storage.py        # ✅ FIXED: Proper file storage
-│   │   └── __init__.py
-│   │
-│   ├── 📁 utils/
-│   │   ├── logger.py              # Structured logging
-│   │   └── __init__.py
-│   │
-│   └── 📁 validators/
-│       ├── content_validator.py   # Legal content validation
-│       └── __init__.py
+├── 📁 shared/                    # Shared components
+│   ├── 📁 models/               # Shared data models
+│   └── 📁 utils/                # Common utilities
 │
-├── 📁 templates/
-│   └── crawler_ui.html            # Web UI template
+├── 📁 infrastructure/            # Infrastructure configuration
+│   ├── 📁 docker/              # Docker configurations
+│   │   └── Dockerfile.scraper  # Scraper service container
+│   └── 📁 k8s/                 # Kubernetes (future)
 │
-├── 📁 data/                        # Data storage
-│   ├── 📁 raw/
-│   │   ├── 📁 acts/               # English acts (markdown files)
-│   │   ├── 📁 volumes/            # Legal volumes
-│   │   └── 📁 bengali/            # Bengali content
-│   │
-│   └── 📁 processed/              # Processed data for indexing
+├── 📁 data/                     # Data storage
+│   ├── 📁 raw/                 # Scraped raw data
+│   │   ├── 📁 acts/           # English acts (markdown + metadata)
+│   │   ├── 📁 volumes/        # Legal volumes
+│   │   └── 📁 bengali/        # Bengali content
+│   ├── 📁 processed/           # Processed/indexed data
+│   └── 📁 logs/               # Application logs
 │
-├── 📁 docs/                        # Documentation
-│   ├── firecrawl.txt              # Firecrawl API docs
-│   ├── architecture.md            # System architecture
-│   ├── data_flow.md               # Data flow documentation
-│   ├── implementation_plan.md     # Phase-wise implementation
-│   └── mvp_implementation_plan.md # MVP plan
+├── 📁 docs/                    # Documentation
+│   ├── 📁 archive/            # Archived old docs
+│   ├── mvp_implementation_plan.md
+│   └── system_design_document.md
 │
-└── 📁 logs/                        # Application logs
-    └── crawler.log                 # Crawler logs
+├── 📄 docker-compose.yml       # Service orchestration
+├── 📄 start_services.sh        # Startup script
+├── 📄 ARCHITECTURE.md          # Architecture documentation
+├── 📄 README.md                # Main project README
+└── 📄 .env                    # Environment variables
 ```
 
-## ✅ What's Working
+## ✅ Refactoring Completed
 
-1. **Data Scraping (Phase 1) - COMPLETE**
-   - ✅ Firecrawl integration with JSON extraction for BD laws
-   - ✅ Automatic HTML to Markdown conversion
-   - ✅ Redis queue management (port 6380)
-   - ✅ File storage with compression
-   - ✅ Web UI for crawling (http://localhost:5000)
-   - ✅ Bengali language support
+### What Changed:
+1. **Clean Service Architecture**: Moved from monolithic to service-based structure
+2. **Organized Scraper**: All scraper code now under `services/scraper/`
+3. **Infrastructure Separation**: Docker configs moved to `infrastructure/`
+4. **Documentation Cleanup**: Archived redundant docs, kept essential ones
+5. **Fixed Dependencies**: Created missing `scheduler.py`
+6. **Updated Configurations**: Docker Compose and startup scripts updated
 
-## 📋 Next Phases
+### Services Status:
+- ✅ **Scraper Service**: Fully operational with 100+ acts scraped
+- 🚧 **RAG Service**: Next implementation (Phase 2)
+- 📋 **API Gateway**: Planned (Phase 3)
+- 📋 **Frontend**: Planned (Phase 4)
 
-### Phase 2: Database & Processing
-- PostgreSQL setup for metadata
-- Go service for text processing
-- Data migration scripts
+## 🚀 Quick Start
 
-### Phase 3: Vector Indexing
-- FAISS vector database setup
-- Embedding generation
-- Similarity search implementation
+### Using Docker:
+```bash
+docker-compose up -d
+# Access web UI at http://localhost:5000
+```
 
-### Phase 4: API Gateway (Mandatory)
-- Spring Boot API Gateway
-- JWT/OAuth2 authentication
-- RESTful endpoints
+### Local Development:
+```bash
+# Start Redis
+redis-server --port 6379
 
-### Phase 5: RAG Service
-- LLM integration
-- Query processing
-- Response generation
+# Run scraper
+cd services/scraper
+python scrapers/bd_law_crawler.py --test
 
-### Phase 6: Frontend
-- React responsive UI
-- Search interface
-- Results visualization
+# Run web UI
+python web_crawler_app.py
+```
 
-## 🚀 How to Use
+## 📊 Data Flow
 
-1. **Start Redis**: `redis-server --port 6380`
-2. **Run Web UI**: `python web_crawler_app.py`
-3. **Access**: http://localhost:5000
-4. **Crawl**: Enter act numbers and click "Start Crawling"
+```
+Web Scraping (Firecrawl) → Redis Queue → Processing → File Storage
+                                ↓
+                        [Future: PostgreSQL + Vector DB]
+                                ↓
+                        [Future: RAG Service]
+                                ↓
+                        [Future: API Gateway]
+                                ↓
+                        [Future: React Frontend]
+```
 
-## 🔧 Key Fixes Applied
+## 🎯 Next Phase (Day 2 MVP)
 
-1. **URL Format**: Using correct `act-details-{number}.html` format
-2. **Markdown Conversion**: Using Firecrawl's JSON extraction for BD law sites
-3. **Storage**: Files stored as clean markdown, not HTML
-4. **Bengali Support**: `?lang=bn` parameter support
+1. **PostgreSQL Setup**: Create schema for structured storage
+2. **Vector Database**: Implement FAISS for embeddings
+3. **RAG Service**: Build FastAPI service with LangChain
+4. **Embeddings**: Generate from scraped content
+5. **Query Pipeline**: Implement semantic search
 
-## 📊 Data Quality
+## 📝 Key Files
 
-- Clean markdown format (no HTML tags)
-- Structured content (title, sections, text)
-- Ready for vector indexing
-- Suitable for RAG queries
+- `services/scraper/scrapers/bd_law_crawler.py` - Main crawler logic
+- `services/scraper/web_crawler_app.py` - Web UI for manual crawling
+- `docker-compose.yml` - Service orchestration
+- `start_services.sh` - Startup automation
+- `.env` - Configuration (copy from `.env.example`)
+
+## 🧪 Testing
+
+All services have been tested and are working:
+- ✅ Scraper imports successfully
+- ✅ Web UI starts (requires Redis)
+- ✅ Docker configuration valid
+- ✅ Scheduler created and functional
+
+## 📚 Resources
+
+- [Architecture Details](ARCHITECTURE.md)
+- [MVP Implementation Plan](docs/mvp_implementation_plan.md)
+- [System Design](docs/system_design_document.md)
+- [Firecrawl API](https://docs.firecrawl.dev/)

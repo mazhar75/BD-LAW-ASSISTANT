@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: bdlaw-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: bdlaw-postgres
+    environment:
+      POSTGRES_DB: bdlaw
+      POSTGRES_USER: bdlaw
+      POSTGRES_PASSWORD: bdlaw123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schemas:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bdlaw -d bdlaw"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  scraper:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.scraper
+    container_name: bdlaw-scraper
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=bdlaw
+      - DB_USER=bdlaw
+      - DB_PASSWORD=bdlaw123
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    command: python services/scraper/scrapers/bd_law_crawler.py --mode worker
+
+  scraper-scheduler:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.scraper
+    container_name: bdlaw-scheduler
+    depends_on:
+      - scraper
+    environment:
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ENVIRONMENT=production
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    command: python services/scraper/scrapers/scheduler.py
+
+  web-ui:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.scraper
+    container_name: bdlaw-web-ui
+    ports:
+      - "5000:5000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ENVIRONMENT=production
+      - FLASK_APP=services/scraper/web_crawler_app.py
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    command: python services/scraper/web_crawler_app.py
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  default:
+    name: bdlaw-network
