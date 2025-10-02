@@ -1,0 +1,222 @@
+{
+  "common": {
+    "appName": "BD Law Assistant",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "noResults": "No results found",
+    "tryAgain": "Try again",
+    "learnMore": "Learn more"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "rememberMe": "Remember Me",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "loginSuccess": "Login successful",
+    "loginError": "Invalid credentials",
+    "registerSuccess": "Registration successful",
+    "registerError": "Registration failed"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "search": "Search Laws",
+    "chat": "Chat Q&A",
+    "bookmarks": "Bookmarks",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help & Support",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "search": {
+    "title": "Search Bangladesh Laws",
+    "description": "Search through thousands of Bangladesh laws, acts, and regulations",
+    "searchPlaceholder": "Search for laws, acts, or regulations...",
+    "search": "Search",
+    "noResults": "No results found",
+    "noResultsDescription": "Try adjusting your search terms or filters",
+    "startSearching": "Start Searching",
+    "startSearchingDescription": "Enter a search term to find relevant laws and regulations",
+    "clearSearch": "Clear Search",
+    "showFilters": "Show Filters",
+    "hideFilters": "Hide Filters",
+    "view": "View",
+    "saved": "Saved",
+    "recent": "Recent",
+    "suggested": "Suggested",
+    "types": {
+      "title": "Search Type",
+      "keyword": {
+        "name": "Keyword",
+        "description": "Exact keyword matching for precise results"
+      },
+      "semantic": {
+        "name": "Semantic",
+        "description": "AI-powered understanding of meaning and context"
+      },
+      "hybrid": {
+        "name": "Hybrid",
+        "description": "Combines keyword and semantic for best results"
+      }
+    },
+    "filters": {
+      "title": "Filters",
+      "reset": "Reset",
+      "yearRange": "Year Range",
+      "from": "From",
+      "to": "To",
+      "category": "Category",
+      "courtType": "Court Type",
+      "language": "Language",
+      "activeFilters": "{count} active filters",
+      "categories": {
+        "criminal": "Criminal",
+        "civil": "Civil",
+        "constitutional": "Constitutional",
+        "corporate": "Corporate",
+        "family": "Family",
+        "labor": "Labor",
+        "tax": "Tax",
+        "environmental": "Environmental"
+      },
+      "courts": {
+        "supreme": "Supreme Court",
+        "highCourt": "High Court",
+        "district": "District Court",
+        "magistrate": "Magistrate Court",
+        "tribunal": "Tribunal"
+      },
+      "languages": {
+        "english": "English",
+        "bengali": "Bengali",
+        "both": "Both"
+      }
+    },
+    "results": {
+      "showing": "Showing {start}-{end} of {total} results",
+      "selected": "{count} selected",
+      "selectAll": "Select all",
+      "perPage": "per page",
+      "export": "Export",
+      "showMore": "Show More",
+      "showLess": "Show Less",
+      "bookmark": "Bookmark",
+      "bookmarked": "Bookmarked",
+      "view": "View",
+      "similarLaws": "{count} similar laws",
+      "sort": {
+        "relevance": "Relevance",
+        "dateDesc": "Newest First",
+        "dateAsc": "Oldest First",
+        "title": "Title (A-Z)"
+      }
+    },
+    "export": {
+      "title": "Export Results",
+      "description": "Export {count} selected results",
+      "cancel": "Cancel",
+      "export": "Export",
+      "exporting": "Exporting...",
+      "success": "Export Successful",
+      "successDescription": "Your results have been exported successfully",
+      "error": "Export Failed",
+      "errorDescription": "Failed to export results. Please try again.",
+      "formats": {
+        "pdf": "PDF Document",
+        "pdfDescription": "Formatted document for printing and sharing",
+        "excel": "Excel/CSV",
+        "excelDescription": "Spreadsheet format for data analysis",
+        "json": "JSON",
+        "jsonDescription": "Structured data for developers",
+        "clipboard": "Copy to Clipboard",
+        "clipboardDescription": "Copy results to paste elsewhere"
+      }
+    }
+  },
+  "chat": {
+    "title": "Legal Q&A Assistant",
+    "placeholder": "Ask a question about Bangladesh laws...",
+    "send": "Send",
+    "newConversation": "New Conversation",
+    "conversations": "Conversations",
+    "sources": "Sources",
+    "suggestedQuestions": "Suggested Questions",
+    "feedback": "Was this helpful?",
+    "yes": "Yes",
+    "no": "No",
+    "copy": "Copy",
+    "regenerate": "Regenerate",
+    "clear": "Clear"
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal Information",
+    "fullName": "Full Name",
+    "phoneNumber": "Phone Number",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "preferences": "Preferences",
+    "notifications": "Notifications",
+    "emailNotifications": "Email Notifications",
+    "pushNotifications": "Push Notifications",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "language": "Language",
+    "updateProfile": "Update Profile",
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Failed to update profile"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {name}!",
+    "overview": "Overview",
+    "recentSearches": "Recent Searches",
+    "savedSearches": "Saved Searches",
+    "recentChats": "Recent Chats",
+    "statistics": "Statistics",
+    "totalSearches": "Total Searches",
+    "totalChats": "Total Chats",
+    "bookmarkedLaws": "Bookmarked Laws",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "allTime": "All Time"
+  },
+  "errors": {
+    "404": "Page not found",
+    "500": "Internal server error",
+    "networkError": "Network error. Please check your connection.",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "You don't have permission to access this resource",
+    "validation": "Please check your input and try again",
+    "somethingWentWrong": "Something went wrong"
+  },
+  "footer": {
+    "copyright": "© {year} BD Law Assistant. All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "disclaimer": "Disclaimer",
+    "cookiePolicy": "Cookie Policy"
+  }
+}
