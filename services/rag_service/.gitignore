@@ -4,95 +4,41 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual Environment
+env/
 venv/
 ENV/
-env/
 .venv/
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Environment Variables
+# ChromaDB
+chroma_db/
+*.db
+
+# Environment
 .env
 .env.local
 .env.*.local
-*.env
 
-# IDEs
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+
+# OS
 .DS_Store
+Thumbs.db
 
 # Logs
 *.log
 logs/
-*.log.*
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# ChromaDB
-data/chroma_data/
-*.parquet
-*.bin
-
-# Models
-models/
-*.pt
-*.pth
-*.h5
-*.onnx
-
-# Test Coverage
-.coverage
+# Testing
 .pytest_cache/
+.coverage
 htmlcov/
-.tox/
-.hypothesis/
 
-# Jupyter
-.ipynb_checkpoints
-*.ipynb
-
-# Documentation
-site/
-docs/_build/
-
-# OS
-Thumbs.db
-.DS_Store
-
-# Temporary files
-*.tmp
-*.bak
-*.swp
-.cache/
-
-# API Test Results
-*_test_report.json
-*_test_report.md
-api_test_report.*
-
-# Migration scripts (keep in git with caution)
-# migrate_*.py
-# check_*.py
+# Data
+data/raw/
+data/processed/

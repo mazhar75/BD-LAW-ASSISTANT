@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # Test PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: bd-law-test-postgres
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: bd_law_test_db
+    ports:
+      - "5433:5432"  # Different port to avoid conflict
+    volumes:
+      - ./services/gateway/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Test Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: bd-law-test-redis
+    ports:
+      - "6380:6379"  # Different port to avoid conflict
+    networks:
+      - test-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Test RAG Service
+  rag-service-test:
+    build:
+      context: ./services/rag
+      dockerfile: Dockerfile
+    container_name: bd-law-test-rag
+    environment:
+      DATABASE_URL: postgresql://test_user:test_password@postgres:5432/bd_law_test_db
+      REDIS_URL: redis://redis:6379
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      TESTING: "true"
+    ports:
+      - "8001:8000"  # Different port to avoid conflict
+    volumes:
+      - ./data:/app/data:ro  # Read-only for testing
+      - ./services/rag/embeddings:/app/embeddings:ro
+      - ./tests:/app/tests
+    networks:
+      - test-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - integration
+      - e2e
+
+  # Test API Gateway
+  api-gateway-test:
+    build:
+      context: ./services/gateway
+      dockerfile: Dockerfile
+    container_name: bd-law-test-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bd_law_test_db
+      SPRING_DATASOURCE_USERNAME: test_user
+      SPRING_DATASOURCE_PASSWORD: test_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: test-secret-key-for-testing-only-must-be-at-least-256-bits
+      SERVER_PORT: 8080
+      RATE_LIMIT_ENABLED: "true"
+      RATE_LIMIT_ANONYMOUS_LIMIT: 10
+      RATE_LIMIT_AUTHENTICATED_LIMIT: 100
+    ports:
+      - "8081:8080"  # Different port to avoid conflict
+    networks:
+      - test-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rag-service-test:
+        condition: service_started
+    profiles:
+      - integration
+      - e2e
+
+  # Test Runner Container
+  test-runner:
+    image: python:3.11-slim
+    container_name: bd-law-test-runner
+    volumes:
+      - ./tests:/tests
+      - ./test-results:/test-results
+    working_dir: /tests
+    environment:
+      GATEWAY_URL: http://api-gateway-test:8080
+      RAG_URL: http://rag-service-test:8000
+      TEST_RESULTS_DIR: /test-results
+    networks:
+      - test-network
+    depends_on:
+      - api-gateway-test
+      - rag-service-test
+    profiles:
+      - e2e
+    command: |
+      sh -c "
+        pip install -q requests pytest pytest-html pytest-cov &&
+        pytest /tests/e2e_test_suite.py -v --html=/test-results/e2e_report.html --self-contained-html
+      "
+
+networks:
+  test-network:
+    driver: bridge
+
+# No persistent volumes for test environment

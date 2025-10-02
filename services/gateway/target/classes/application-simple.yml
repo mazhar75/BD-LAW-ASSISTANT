@@ -1,0 +1,57 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: bd-law-gateway
+  main:
+    allow-bean-definition-overriding: true
+
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bdlaw
+    username: postgres
+    password: nihad1086
+    driver-class-name: org.postgresql.Driver
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  # Disable Redis for now
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+  cache:
+    type: simple
+
+# JWT Configuration
+jwt:
+  secret: your-256-bit-secret-key-for-jwt-token-generation-must-be-at-least-256-bits
+  expiration: 86400000
+  refresh-expiration: 604800000
+  issuer: bd-law-assistant
+
+# Service URLs
+services:
+  rag:
+    url: http://localhost:8000
+    timeout: 30000
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      base-path: /actuator
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.bdlaw.gateway: DEBUG
