@@ -1,0 +1,30 @@
+# RAG Service Requirements
+
+# Database
+# psycopg2-binary==2.9.9  # Already installed: 2.9.10
+
+# FastAPI and web
+# fastapi==0.104.1  # Already installed: 0.116.2
+# uvicorn[standard]==0.24.0  # Already installed: 0.35.0
+# pydantic==2.5.0  # Already installed: 2.11.7
+python-multipart
+
+# Vector database and ML
+# faiss-cpu==1.7.4  # Already installed: 1.12.0
+sentence-transformers
+# torch==2.1.0  # Already installed: 2.8.0
+# numpy==1.24.3  # Already installed: 2.3.1
+
+# LangChain and LLM
+langchain
+langchain-community
+openai
+tiktoken
+
+# Text processing
+nltk
+spacy
+
+# Testing
+pytest
+pytest-asyncio
