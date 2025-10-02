@@ -9,7 +9,20 @@ venv/
 ENV/
 .venv
 
+# Node.js
+node_modules/
+.next/
+.npm/
+package-lock.json
+
+# Java/Maven
+target/
+maven-deps/
+*.jar
+*.war
+
 # Data files (too large for git)
+data/
 data/raw/
 data/processed/
 data/logs/
@@ -21,6 +34,7 @@ data/logs/
 # IDE
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 
