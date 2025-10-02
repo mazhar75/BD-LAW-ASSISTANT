@@ -17,7 +17,7 @@ class Settings:
 
     def __init__(self):
         # Firecrawl settings
-        self.firecrawl_api_key = os.getenv('FIRECRAWL_API_KEY', 'fc-3b27f7cc5dec461cba61a71d5946d73b')
+        self.firecrawl_api_key = os.getenv('FIRECRAWL_API_KEY', '')  # Must be set in .env
         self.firecrawl_base_url = os.getenv('FIRECRAWL_BASE_URL', 'https://api.firecrawl.dev')
         self.firecrawl_timeout = int(os.getenv('CRAWLER_TIMEOUT', '600000'))
         self.firecrawl_max_retries = int(os.getenv('CRAWLER_MAX_RETRIES', '3'))
@@ -29,12 +29,12 @@ class Settings:
         self.redis_password = os.getenv('REDIS_PASSWORD', None)
 
         # Database settings
-        self.database_url = os.getenv('DATABASE_URL', 'postgresql://postgres:nihad1086@localhost:5432/bdlaw')
+        self.database_url = os.getenv('DATABASE_URL', '')
         self.db_host = os.getenv('DB_HOST', 'localhost')
         self.db_port = int(os.getenv('DB_PORT', '5432'))
         self.db_name = os.getenv('DB_NAME', 'bdlaw')
         self.db_user = os.getenv('DB_USER', 'postgres')
-        self.db_password = os.getenv('DB_PASSWORD', 'nihad1086')
+        self.db_password = os.getenv('DB_PASSWORD', '')  # Must be set in .env
 
         # Crawler settings
         self.crawler_batch_size = int(os.getenv('CRAWLER_BATCH_SIZE', '50'))
