@@ -125,7 +125,7 @@ python -m scrapers.bd_law_crawler crawl --start 1 --end 100 --language en
 
 ## 📁 Project Structure
 
-\`\`\`
+```
 services/scraper/
 ├── web_crawler_app.py          # Flask web UI
 ├── scrapers/
@@ -139,7 +139,7 @@ services/scraper/
 ├── .env                        # Config (git-ignored)
 ├── .gitignore                  # Git ignore rules
 └── requirements.txt            # Dependencies
-\`\`\`
+```
 
 ## 🔒 Security
 
