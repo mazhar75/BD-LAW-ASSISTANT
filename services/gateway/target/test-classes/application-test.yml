@@ -1,0 +1,72 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      maximum-pool-size: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+  cache:
+    type: simple
+
+  cloud:
+    discovery:
+      enabled: false
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+
+# JWT Configuration for testing
+jwt:
+  secret: test-secret-key-for-jwt-token-generation-must-be-at-least-256-bits
+  expiration: 3600000
+  refresh-expiration: 86400000
+
+# Disable rate limiting for tests
+rate-limit:
+  enabled: true
+  anonymous:
+    limit: 10
+    duration: 60
+  authenticated:
+    limit: 100
+    duration: 60
+  premium:
+    limit: 1000
+    duration: 60
+
+# Logging
+logging:
+  level:
+    com.bdlaw: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+
+# Server Configuration
+server:
+  port: 8080
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

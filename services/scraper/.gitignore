@@ -4,97 +4,36 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual Environment
+env/
 venv/
 ENV/
-env/
 .venv/
 
-# Environment Variables
+# Scraped data
+data/raw/
+data/processed/
+*.gz
+*.html
+*.md
+
+# Environment
 .env
 .env.local
-.env.*.local
-*.env
 
-# IDEs
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+
+# OS
 .DS_Store
+Thumbs.db
 
 # Logs
 *.log
 logs/
-*.log.*
-data/logs/
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Data directories
-data/
-!data/.gitkeep
-data/raw/
-data/processed/
-
-# Redis
-dump.rdb
 
 # Testing
-.coverage
 .pytest_cache/
-htmlcov/
-.tox/
-.hypothesis/
-
-# Jupyter
-.ipynb_checkpoints
-*.ipynb
-
-# OS
-Thumbs.db
-.DS_Store
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# Monitoring
-*.rdb
-*.aof
-
-# Temporary files
-*.tmp
-*.bak
-*.swp
-.cache/
-
-# Flask
-instance/
-.webassets-cache
-
-# Scraped data (optional - uncomment to ignore)
-# *.json
-# *.jsonl
-# *.html
+.coverage
