@@ -1,8 +1,10 @@
+D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\dto\SyncResponse.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\repository\RoleRepository.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\config\WebClientConfig.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\controller\ProxyController.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\security\JwtAuthenticationFilter.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\config\SwaggerConfig.java
+D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\dto\UpdateBookmarkRequest.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\repository\UserRepository.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\config\RedisConfig.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\controller\RagProxyController.java
@@ -17,9 +19,12 @@ D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\dto\Registe
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\dto\ChangePasswordRequest.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\service\EmailService.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\config\WebMvcConfig.java
+D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\controller\BookmarkController.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\dto\LoginResponse.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\entity\User.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\GatewayApplication.java
+D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\service\UserBookmarkService.java
+D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\repository\UserBookmarkRepository.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\dto\LoginRequest.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\entity\UserPreferences.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\security\JwtAuthenticationEntryPoint.java
@@ -32,7 +37,10 @@ D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\interceptor
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\controller\UserProfileController.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\config\SimpleSecurityConfig.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\entity\ApiKey.java
+D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\dto\BookmarkResponse.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\controller\AuthController.java
+D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\entity\UserBookmark.java
+D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\dto\BookmarkRequest.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\repository\EmailVerificationTokenRepository.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\entity\UsageTracking.java
 D:\BD Law Assistant\services\gateway\src\main\java\com\bdlaw\gateway\service\RateLimitService.java

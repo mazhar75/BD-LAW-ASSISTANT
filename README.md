@@ -1,205 +1,171 @@
 # BD Law Assistant
 
-## Overview
+AI-powered legal information system for Bangladesh providing intelligent search and question-answering across 300+ laws with 29,000+ indexed document chunks.
 
-BD Law Assistant is a comprehensive legal information system for Bangladesh, providing AI-powered search and question-answering capabilities for Bangladesh laws and regulations. The system uses a microservices architecture with RAG (Retrieval-Augmented Generation) technology powered by Google's Gemini 2.5 Flash model.
+## ✨ Key Features
 
-## Features
-
-- **AI-Powered Legal Search** - Semantic search across 300+ Bangladesh laws with 29,000+ indexed chunks
-- **Intelligent Q&A** - Natural language questions answered with legal citations
+- **AI-Powered Legal Search** - Semantic search across Bangladesh laws
+- **Intelligent Q&A** - Natural language legal questions with citations
+- **User Dashboard & Analytics** - Real-time usage statistics and insights
+- **Bookmark Management** - Backend-synced bookmark system
 - **Bilingual Support** - Full English and Bengali language support
-- **User Authentication** - Secure JWT-based authentication and authorization
-- **Role-Based Access Control** - User, Premium, and Admin roles
-- **Web Scraping** - Automated legal document collection from BD government sources
-- **Modern Web Interface** - Responsive React/Next.js frontend
-- **Microservices Architecture** - Scalable, maintainable service-oriented design
+- **JWT Authentication** - Secure authentication with automatic token refresh
+- **Role-Based Access Control** - User, Premium, and Admin tiers
+- **Usage Tracking** - Comprehensive user activity analytics
+- **Modern Web Interface** - Responsive Next.js frontend
+- **Microservices Architecture** - Scalable, maintainable design
 
-## Architecture
+## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    BD Law Assistant                          │
-│                   Microservices Stack                        │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                         BD Law Assistant                            │
+│                  AI-Powered Legal Information System                │
+└─────────────────────────────────────────────────────────────────────┘
 
-┌──────────────────┐
-│   Frontend       │  Next.js 15 + React 19
-│   Port: 3000     │  - Bilingual UI (EN/BN)
-│                  │  - JWT Auth Integration
-└────────┬─────────┘  - Responsive Design
-         │
-         ↓ HTTP + JWT
-┌──────────────────┐
-│   API Gateway    │  Spring Boot 3.2 + Java 17
-│   Port: 8081     │  - Authentication & Authorization
-│                  │  - Rate Limiting (Redis)
-└────────┬─────────┘  - Request Routing
-         │
-         ├───────────────────┬──────────────────┐
-         ↓                   ↓                  ↓
-┌─────────────────┐  ┌──────────────┐  ┌──────────────┐
-│  RAG Service    │  │   Scraper    │  │   Future     │
-│  Port: 8000     │  │   Service    │  │   Services   │
-│                 │  │   Port: 8001 │  │              │
-│ - Vector Search │  │              │  │              │
-│ - Gemini LLM    │  │ - Firecrawl  │  │              │
-│ - ChromaDB      │  │ - Redis Queue│  │              │
-└─────────────────┘  └──────────────┘  └──────────────┘
+                            USER INTERFACE
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Frontend Service                            │
+│                    Next.js 15 + React 19 + TS                       │
+│                         Port: 3000                                  │
+│                                                                     │
+│  Features:                                                          │
+│  • Bilingual UI (EN/BN)          • Search Interface                 │
+│  • User Authentication           • Chat Interface (Perplexity-style)│
+│  • Bookmarks (localStorage)      • Responsive Design                 │
+└──────────────────────────────┬───────────────────────────────────────┘
+                              │
+                              │ HTTP + JWT Token
+                              │
+                              ▼
+                      API GATEWAY LAYER
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Gateway Service                             │
+│                  Spring Boot 3.2 + Java 17                          │
+│                         Port: 8081                                  │
+│                                                                     │
+│  Responsibilities:                                                  │
+│  • Authentication & Authorization     • JWT Token Management        │
+│  • Rate Limiting (Redis)              • Request Routing             │
+│  • User Management (PostgreSQL)       • Security & CORS             │
+│  • Audit Logging                      • Role-Based Access Control   │
+└──────────┬───────────────────────┬────────────────────┬─────────────┘
+           │                       │                    │
+           │                       │                    │
+           ▼                       ▼                    ▼
+    BACKEND SERVICES LAYER
+┌──────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   RAG Service    │    │ Scraper Service  │    │ Future Services │
+│   FastAPI +      │    │   Flask +        │    │                 │
+│   Python 3.11    │    │   Python 3.11    │    │  • Analytics    │
+│   Port: 8000     │    │   Port: 8001     │    │  • Notifications│
+│                  │    │                  │    │  • ML Training  │
+│  Features:       │    │  Features:       │    │                 │
+│  • Vector Search │    │  • Web Scraping  │    │                 │
+│  • Semantic      │    │  • Firecrawl API │    │                 │
+│  • Keyword       │    │  • Redis Queue   │    │                 │
+│  • Hybrid Search │    │  • Web UI        │    │                 │
+│  • RAG Q&A       │    │  • Bilingual     │    │                 │
+│  • Gemini LLM    │    │                  │    │                 │
+└────────┬─────────┘    └────────┬─────────┘    └─────────────────┘
+         │                       │
+         │                       │
+         ▼                       ▼
+                   DATA LAYER
+┌─────────────────────────────────────────────────────────────────────┐
+│                         PostgreSQL Database                         │
+│                            Port: 5432                               │
+│                                                                     │
+│  ┌──────────────────┐              ┌──────────────────┐             │
+│  │   Auth Schema    │              │  Public Schema   │             │
+│  │  (Gateway Owned) │              │  (RAG Owned)     │             │
+│  │                  │              │                  │             │
+│  │  • users         │              │  • laws (300+)   │             │
+│  │  • roles         │              │  • law_chunks    │             │
+│  │  • user_roles    │              │    (29,219)      │             │
+│  │  • api_keys      │              │  • embeddings    │             │
+│  │  • refresh_tokens│              │  • query_logs    │             │
+│  │  • audit_logs    │              │                  │             │
+│  │  • rate_limits   │              │                  │             │
+│  └──────────────────┘              └──────────────────┘             │
+└─────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────┐
-│                    Infrastructure                            │
-├──────────────────┬──────────────────┬──────────────────────┤
-│   PostgreSQL     │   Redis          │   ChromaDB           │
-│   Port: 5432     │   Port: 6379     │   (Embedded)         │
-│   - User Data    │   - Rate Limit   │   - Vector Store     │
-│   - Sessions     │   - Task Queue   │   - 29K Chunks       │
-└──────────────────┴──────────────────┴──────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                           Redis Cache                               │
+│                           Port: 6379                                │
+│                                                                     │
+│  • Rate Limiting Counters        • Session Cache                    │
+│  • Scraper Task Queue            • Temporary Data                   │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ChromaDB Vector Store                            │
+│                         (Embedded)                                  │
+│                                                                     │
+│  • 29,219 Law Chunk Vectors                                         │
+│  • 384-dimensional embeddings                                       │
+│  • Cosine similarity search                                         │
+│  • Model: paraphrase-multilingual-MiniLM-L12-v2                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                       External Services                             │
+│                                                                     │
+│  • Google Gemini API (LLM)       • Firecrawl API (Web Scraping)     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Services
+## 📦 Services
 
-### 1. Frontend (`services/frontend`)
+### Frontend (`services/frontend`)
+- **Tech**: Next.js 15.5.3, React 19, TypeScript, Tailwind CSS 4
+- **Features**: User dashboard, search, chat, bookmarks, analytics
+- **Port**: 3000
 
-**Technology**: Next.js 15, React 19, TypeScript, Tailwind CSS
+### Gateway (`services/gateway`)
+- **Tech**: Spring Boot 3.2, Java 17, PostgreSQL, Redis
+- **Features**: JWT auth, user management, bookmarks, usage tracking, rate limiting
+- **Port**: 8081
 
-**Features**:
-- Modern bilingual interface (English/Bengali)
-- JWT authentication with automatic token refresh
-- Legal document search
-- AI-powered chat interface
-- Responsive design
+### RAG Service (`services/rag_service`)
+- **Tech**: Python 3.11, FastAPI, ChromaDB, Gemini 2.5 Flash
+- **Features**: Vector search, semantic search, AI Q&A
+- **Port**: 8000
 
-**Port**: 3000
+### Scraper (`services/scraper`)
+- **Tech**: Python 3.11, Firecrawl API, Redis
+- **Features**: Automated legal document scraping
+- **Port**: 8001
 
-[→ Frontend Documentation](services/frontend/README.md)
+## 🚀 Quick Start
 
-### 2. API Gateway (`services/gateway`)
+### Prerequisites
+- Node.js 20+, Python 3.11+, Java 17+
+- PostgreSQL 14+, Redis 7+
+- Gemini API Key
 
-**Technology**: Spring Boot 3.2, Java 17, Spring Security
-
-**Features**:
-- Centralized authentication and authorization
-- JWT token management (access + refresh tokens)
-- Redis-based rate limiting (tiered: Anonymous, User, Premium, Admin)
-- Request routing to backend services
-- CORS and security headers
-
-**Port**: 8081
-
-[→ Gateway Documentation](services/gateway/README.md)
-
-### 3. RAG Service (`services/rag_service`)
-
-**Technology**: Python 3.11, FastAPI, ChromaDB, Sentence Transformers
-
-**Features**:
-- Vector search using ChromaDB
-- 29,219 legal document chunks indexed
-- 300 Bangladesh laws in database
-- Gemini 2.5 Flash LLM integration
-- Multilingual embeddings (paraphrase-multilingual-MiniLM-L12-v2)
-- RESTful API for search and Q&A
-
-**Port**: 8000
-
-[→ RAG Service Documentation](services/rag_service/README.md)
-
-### 4. Scraper Service (`services/scraper`)
-
-**Technology**: Python 3.11, Firecrawl API, Redis, Flask
-
-**Features**:
-- Automated web scraping of Bangladesh legal documents
-- Firecrawl API integration for robust scraping
-- Redis-based task queue
-- Bilingual content support (English & Bengali)
-- Web UI for monitoring scraping progress
-
-**Port**: 8001 (Web UI: 5000)
-
-[→ Scraper Documentation](services/scraper/README.md)
-
-## Prerequisites
-
-Before running the system, ensure you have the following installed and running:
-
-### Required Software
-
-| Software | Version | Purpose |
-|----------|---------|---------|
-| **Python** | 3.11+ | RAG & Scraper services |
-| **Node.js** | 20+ | Frontend application |
-| **Java** | 17+ | Gateway service |
-| **Maven** | 3.8+ | Gateway build tool |
-| **PostgreSQL** | 14+ | User data, sessions |
-| **Redis** | 7+ | Rate limiting, task queue |
-
-### Required Services
-
-**1. PostgreSQL Database**
+### Installation
 
 ```bash
-# Start PostgreSQL
-# Windows: Start via Services or pg_ctl
-# Linux/Mac: sudo service postgresql start
-
-# Create database
-psql -U postgres
-CREATE DATABASE bdlaw;
-
-# Run gateway schema
-psql -U postgres -d bdlaw -f services/gateway/src/main/resources/schema.sql
-```
-
-**2. Redis Server**
-
-```bash
-# Start Redis on default port 6379
+# 1. Start PostgreSQL and Redis
 redis-server
 
-# Or with Docker
-docker run -d --name redis -p 6379:6379 redis:7-alpine
-```
-
-## Quick Start
-
-### Option 1: Manual Start (Recommended for Development)
-
-**Step 1: Start Infrastructure**
-
-```bash
-# Terminal 1: Start PostgreSQL (if not running as service)
-# Terminal 2: Start Redis
-redis-server
-```
-
-**Step 2: Start Backend Services**
-
-```bash
-# Terminal 3: Start RAG Service
+# 2. Start RAG Service
 cd services/rag_service
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env with your GEMINI_API_KEY and DB_PASSWORD
+# Edit .env with GEMINI_API_KEY and DB_PASSWORD
 python src/main.py
 
-# Terminal 4: Start Gateway
+# 3. Start Gateway
 cd services/gateway
 cp .env.example .env
 # Edit .env with DB_PASSWORD and JWT_SECRET
-mvn spring-boot:run -Dspring-boot.run.arguments="\
-  --DB_PASSWORD=your_password \
-  --JWT_SECRET=your_secret \
-  --RAG_SERVICE_URL=http://localhost:8000"
-```
+mvn spring-boot:run
 
-**Step 3: Start Frontend**
-
-```bash
-# Terminal 5: Start Frontend
+# 4. Start Frontend
 cd services/frontend
 npm install
 cp .env.example .env.local
@@ -207,306 +173,79 @@ cp .env.example .env.local
 npm run dev
 ```
 
-**Step 4: Access Application**
+Access at `http://localhost:3000`
 
-- Frontend: http://localhost:3000
-- Gateway: http://localhost:8081/actuator/health
-- RAG Service: http://localhost:8000/docs
+## 📊 Database Schema
 
-### Option 2: Docker Compose
+### PostgreSQL Tables
+```sql
+-- Users and Authentication
+auth.users (id, username, email, password_hash, role, ...)
+auth.refresh_tokens (id, user_id, token, expires_at, ...)
+
+-- Bookmarks
+auth.user_bookmarks (id, user_id, item_id, title, type, ...)
+
+-- Usage Tracking
+auth.user_usage (id, user_id, endpoint, method, response_time_ms, date, ...)
+
+-- Legal Documents
+public.laws (id, title, content, category, ...)
+public.law_chunks (id, law_id, chunk_text, embedding, ...)
+```
+
+## 🔐 Security
+
+- BCrypt password hashing
+- JWT with access (15min) + refresh (7 days) tokens
+- Redis-based rate limiting by role
+- CORS and CSRF protection
+- SQL injection prevention (JPA)
+- XSS protection headers
+
+## 📈 Current Status
+
+✅ **Production Ready**
+- 300+ laws indexed
+- 29,219 document chunks
+- Full authentication system
+- User analytics dashboard
+- Backend-synced bookmarks
+- Real-time usage tracking
+- Working login/logout
+- All core features implemented
+
+## 📖 Documentation
+
+- [Frontend README](services/frontend/README.md)
+- [Gateway README](services/gateway/README.md)
+- [RAG Service README](services/rag_service/README.md)
+- [Scraper README](services/scraper/README.md)
+- [Architecture Summary](ARCHITECTURE_SUMMARY.md)
+- [Documentation Index](DOCUMENTATION_INDEX.md)
+
+## 🧪 Testing
 
 ```bash
-# Build and start all services
+# Gateway tests
+cd services/gateway
+mvn test
+
+# RAG Service tests
+cd services/rag_service
+pytest
+
+# Frontend linting
+cd services/frontend
+npm run lint
+```
+
+## 🚢 Deployment
+
+See individual service READMEs for deployment instructions.
+
+**Docker Compose** (recommended):
+```bash
 docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop all services
-docker-compose down
 ```
 
-## Configuration
-
-### Environment Variables
-
-Each service requires configuration through environment variables. Copy `.env.example` to `.env` in each service directory:
-
-**RAG Service** (`services/rag_service/.env`):
-```bash
-GEMINI_API_KEY=your_gemini_api_key  # Required
-DB_PASSWORD=your_db_password        # Required
-GEMINI_MODEL=gemini-2.5-flash
-```
-
-**Gateway** (`services/gateway/.env`):
-```bash
-DB_PASSWORD=your_db_password                    # Required
-JWT_SECRET=your-256-bit-secret-key              # Required
-RAG_SERVICE_URL=http://localhost:8000
-```
-
-**Frontend** (`services/frontend/.env.local`):
-```bash
-NEXT_PUBLIC_GATEWAY_URL=http://localhost:8081   # Required
-NEXT_PUBLIC_APP_NAME=BD Law Assistant
-```
-
-**Scraper** (`services/scraper/.env`):
-```bash
-FIRECRAWL_API_KEY=your_firecrawl_key  # Required for scraping
-DB_PASSWORD=your_db_password
-```
-
-### API Keys
-
-1. **Gemini API Key** (Required for RAG service)
-   - Get from: https://aistudio.google.com/app/apikey
-   - Free tier available
-
-2. **Firecrawl API Key** (Required for scraper)
-   - Get from: https://firecrawl.dev
-   - Needed only if running scraper service
-
-## Testing
-
-### Health Checks
-
-```bash
-# Check RAG Service
-curl http://localhost:8000/
-
-# Check Gateway
-curl http://localhost:8081/actuator/health
-
-# Check Frontend (visit in browser)
-open http://localhost:3000
-```
-
-### API Testing
-
-```bash
-# Test RAG Search
-curl -X POST http://localhost:8000/api/v1/search \
-  -H "Content-Type: application/json" \
-  -d '{"query": "property law", "limit": 5}'
-
-# Test Gateway Auth
-curl -X POST http://localhost:8081/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"username":"test","email":"test@example.com","password":"Test123!","fullName":"Test User"}'
-```
-
-### Automated Tests
-
-```bash
-# Gateway endpoint tests
-python test_gateway_endpoints.py
-
-# View test report
-cat docs/GATEWAY_TEST_REPORT.md
-```
-
-## Data
-
-### RAG Service Database
-
-**Current Status**:
-- **300 laws** indexed
-- **29,219 chunks** in ChromaDB
-- **Embedding model**: paraphrase-multilingual-MiniLM-L12-v2 (384 dimensions)
-- **Vector database**: ChromaDB with cosine similarity
-
-### Scraping New Data
-
-```bash
-cd services/scraper
-
-# Start web UI
-python web_crawler_app.py
-# Visit http://localhost:5000
-
-# Or use CLI
-python -m scrapers.bd_law_crawler crawl --start 1 --end 100 --language en
-```
-
-## Project Structure
-
-```
-BD Law Assistant/
-├── services/
-│   ├── frontend/          # Next.js frontend
-│   ├── gateway/           # Spring Boot API gateway
-│   ├── rag_service/       # Python RAG service
-│   └── scraper/           # Python scraper service
-│
-├── docs/                  # Documentation
-│   ├── GATEWAY_TEST_REPORT.md
-│   └── gateway_test_results.json
-│
-├── docker-compose.yml     # Docker orchestration
-├── .env.example           # Root environment template
-└── README.md              # This file
-```
-
-## Deployment
-
-### Development
-
-Use the Quick Start guide above for local development.
-
-### Production
-
-**Docker Compose** (Recommended):
-
-```bash
-# Update environment variables in docker-compose.yml
-# Build and deploy
-docker-compose up -d
-
-# Monitor logs
-docker-compose logs -f
-
-# Scale services
-docker-compose up -d --scale rag_service=3
-```
-
-**Manual Deployment**:
-
-1. Set up infrastructure (PostgreSQL, Redis)
-2. Build each service:
-   - Frontend: `npm run build && npm start`
-   - Gateway: `mvn clean package && java -jar target/gateway.jar`
-   - RAG: `python src/main.py`
-3. Configure reverse proxy (Nginx/Traefik)
-4. Enable HTTPS with SSL certificates
-
-## Troubleshooting
-
-### Common Issues
-
-**1. PostgreSQL Connection Failed**
-
-```bash
-# Check PostgreSQL is running
-pg_isready -h localhost -p 5432
-
-# Check database exists
-psql -U postgres -l | grep bdlaw
-
-# Verify password in .env files
-```
-
-**2. Redis Connection Error**
-
-```bash
-# Check Redis is running
-redis-cli ping
-# Should return: PONG
-
-# Check port
-netstat -an | grep 6379
-```
-
-**3. Gateway Returns 401 on Login**
-
-This is a known issue with the security configuration. Workaround:
-- Use registration endpoint (works correctly)
-- Or access RAG service directly at port 8000
-
-See `docs/GATEWAY_TEST_REPORT.md` for details.
-
-**4. RAG Service: Gemini API Error**
-
-```bash
-# Verify API key is set
-cat services/rag_service/.env | grep GEMINI_API_KEY
-
-# Test API key validity
-curl -H "Content-Type: application/json" \
-  -d '{"contents":[{"parts":[{"text":"test"}]}]}' \
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY"
-```
-
-**5. Frontend Can't Connect to Gateway**
-
-```bash
-# Check NEXT_PUBLIC_GATEWAY_URL in .env.local
-cat services/frontend/.env.local
-
-# Verify gateway is running
-curl http://localhost:8081/actuator/health
-
-# Clear browser cache and cookies
-```
-
-### Port Conflicts
-
-```bash
-# Check if port is in use
-netstat -ano | findstr :8081  # Windows
-lsof -i :8081                 # Linux/Mac
-
-# Kill process
-taskkill /PID <pid> /F        # Windows
-kill -9 <pid>                 # Linux/Mac
-```
-
-## Performance
-
-### Expected Response Times
-
-| Operation | Response Time | Notes |
-|-----------|--------------|-------|
-| RAG Search | 2-3s | Cold start, 1-2s warm |
-| RAG Q&A | 5-10s | Depends on Gemini API |
-| Gateway Auth | 50-100ms | Token validation |
-| Frontend Load | 500ms-1s | Initial page load |
-
-### Scaling
-
-- **RAG Service**: Can scale horizontally with load balancer
-- **Gateway**: Stateless, easy to scale with Redis sessions
-- **Frontend**: Static build, deploy to CDN
-
-## Security
-
-- **Authentication**: JWT with refresh tokens
-- **Password Hashing**: BCrypt (Gateway)
-- **API Rate Limiting**: Redis-based, tiered limits
-- **CORS**: Configured per service
-- **Environment Variables**: Never commit `.env` files
-- **HTTPS**: Required for production
-
-## Documentation
-
-- **RAG Service**: [services/rag_service/README.md](services/rag_service/README.md)
-- **Gateway**: [services/gateway/README.md](services/gateway/README.md)
-- **Frontend**: [services/frontend/README.md](services/frontend/README.md)
-- **Scraper**: [services/scraper/README.md](services/scraper/README.md)
-- **Gateway Tests**: [docs/GATEWAY_TEST_REPORT.md](docs/GATEWAY_TEST_REPORT.md)
-
-## Contributing
-
-1. Follow the code style of each service (Java, Python, TypeScript)
-2. Write tests for new features
-3. Update relevant README files
-4. Ensure all services start successfully
-
-## License
-
-Apache License 2.0
-
-## Support
-
-For issues and questions:
-- Create an issue in the GitHub repository
-- Check service-specific README files
-- Review test reports in `docs/` directory
-
----
-
-**Version**: 1.0.0
-**Status**: Operational
-**Last Updated**: 2025-10-02
-**Maintainer**: BD Law Assistant Team

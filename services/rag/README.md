@@ -18,11 +18,11 @@ The RAG (Retrieval-Augmented Generation) service provides intelligent search and
 │                    (localhost:8002)                         │
 ├─────────────────────────────────────────────────────────────┤
 │  Components:                                                │
-│  ├── FastAPI Server (api/main.py)                          │
-│  ├── RAG Pipeline (rag/rag_pipeline_gemini.py)            │
-│  ├── Vector Search (search/vector_search.py)              │
-│  ├── Embeddings (embeddings/)                             │
-│  └── Database Connection (database/)                       │
+│  ├── FastAPI Server (api/main.py)                           │
+│  ├── RAG Pipeline (rag/rag_pipeline_gemini.py)              │
+│  ├── Vector Search (search/vector_search.py)                │
+│  ├── Embeddings (embeddings/)                               │
+│  └── Database Connection (database/)                        │
 └────────────┬───────────────────────────┬────────────────────┘
              │                           │
              ▼                           ▼

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ApiError } from '@/types/errors';
+// import { ApiError } from '@/types/errors';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -14,6 +14,7 @@ import { useToast } from '@/components/providers/ToastProvider';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/lib/api/services/auth.service';
 import { Eye, EyeOff, LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
+import { syncBookmarks } from '@/lib/utils/bookmarks';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -43,19 +44,15 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log('Login form submitted with:', data);
     try {
       setIsLoading(true);
-      console.log('Calling authService.login...');
       const response = await authService.login({
         usernameOrEmail: data.email,
         password: data.password,
         rememberMe: data.rememberMe
       });
-      console.log('Login response:', response);
 
       if (response.success) {
-        console.log('Login successful, setting user:', response.data.user);
         setUser(response.data.user);
 
         showToast({
@@ -65,27 +62,25 @@ export default function LoginPage() {
         });
 
         const redirect = new URLSearchParams(window.location.search).get('redirect');
-        console.log('Redirecting to:', redirect || '/dashboard');
 
-        // Use router.replace for immediate navigation and ensure it's called
+        // Wait for Zustand to persist to localStorage before navigating
         setTimeout(() => {
-          router.replace(redirect || '/dashboard');
-        }, 100);
+          const targetUrl = redirect || '/dashboard';
+          router.push(targetUrl);
+        }, 200);
       }
-    } catch (error: any) {
-      console.error('Login error full details:', error);
-      console.error('Error response:', error?.response);
-      console.error('Error message:', error?.message);
+    } catch (error: unknown) {
+      const err = error as { message?: string; response?: { status?: number; data?: unknown } };
 
       // Check if it's a network error
-      if (error?.message === 'Network Error' || !error?.response) {
+      if (err?.message === 'Network Error' || !err?.response) {
         showToast({
           title: 'Connection Error',
           description: 'Unable to connect to the server. Please check if the backend is running.',
           type: 'error'
         });
         setError('root', { message: 'Connection failed. Backend may be down.' });
-      } else if (error?.response?.status === 401) {
+      } else if (err?.response?.status === 401) {
         setError('email', { message: 'Invalid email or password' });
         setError('password', { message: 'Invalid email or password' });
         showToast({
@@ -93,7 +88,7 @@ export default function LoginPage() {
           description: 'Invalid email or password',
           type: 'error'
         });
-      } else if (error?.response?.status === 403) {
+      } else if (err?.response?.status === 403) {
         showToast({
           title: 'Account Not Verified',
           description: 'Please verify your email before logging in',
@@ -102,7 +97,7 @@ export default function LoginPage() {
       } else {
         showToast({
           title: 'Login Failed',
-          description: error?.response?.data?.message || error?.message || 'An error occurred during login',
+          description: (err?.response?.data as { message?: string })?.message || err?.message || 'An error occurred during login',
           type: 'error'
         });
       }

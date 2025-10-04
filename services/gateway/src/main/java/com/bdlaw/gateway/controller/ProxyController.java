@@ -22,23 +22,7 @@ public class ProxyController {
     @Value("${services.rag.url:http://localhost:8000}")
     private String ragServiceUrl;
 
-    /**
-     * Proxy requests to RAG service
-     */
-    @PostMapping("/rag/search")
-    public Mono<ResponseEntity<Map>> searchProxy(@RequestBody Map<String, Object> request) {
-        log.info("Proxying search request to RAG service");
-
-        return webClientBuilder.build()
-            .post()
-            .uri(ragServiceUrl + "/api/v1/search/")  // Fixed: Added trailing slash
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(request)
-            .retrieve()
-            .toEntity(Map.class)
-            .doOnSuccess(response -> log.info("Search request successful"))
-            .doOnError(error -> log.error("Search request failed", error));
-    }
+    // NOTE: /api/rag/search endpoint is now handled by RagProxyController
 
     /**
      * Proxy chat/ask requests to RAG service

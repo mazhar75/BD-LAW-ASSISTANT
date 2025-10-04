@@ -1,33 +1,38 @@
 'use client';
 
 import { useSearchStore } from '@/store/searchStore';
-import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Info } from 'lucide-react';
 import { useState } from 'react';
 
-export function SearchTypeSelector() {
-  const t = useTranslations('search.types');
-  const { searchType, setSearchType } = useSearchStore();
+interface SearchTypeSelectorProps {
+  value?: 'keyword' | 'semantic' | 'hybrid';
+  onChange?: (type: 'keyword' | 'semantic' | 'hybrid') => void;
+}
+
+export function SearchTypeSelector({ value, onChange }: SearchTypeSelectorProps) {
+  const store = useSearchStore();
+  const searchType = value || store.searchType;
+  const setSearchType = onChange || store.setSearchType;
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
 
   const searchTypes = [
     {
       id: 'keyword',
-      name: t('keyword.name'),
-      description: t('keyword.description'),
+      name: 'Keyword Search',
+      description: 'Search for exact matches of words and phrases',
       icon: '🔤'
     },
     {
       id: 'semantic',
-      name: t('semantic.name'),
-      description: t('semantic.description'),
+      name: 'Semantic Search',
+      description: 'Search based on meaning and context using AI',
       icon: '🧠'
     },
     {
       id: 'hybrid',
-      name: t('hybrid.name'),
-      description: t('hybrid.description'),
+      name: 'Hybrid Search',
+      description: 'Combines keyword and semantic search for best results',
       icon: '⚡'
     }
   ];
@@ -35,7 +40,7 @@ export function SearchTypeSelector() {
   return (
     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
-        <span className="font-medium">{t('title')}</span>
+        <span className="font-medium">Search Type</span>
         <Info className="h-4 w-4 text-gray-500" />
       </div>
 

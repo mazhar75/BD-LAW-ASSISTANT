@@ -1,197 +1,102 @@
 'use client';
 
-import { useState } from 'react';
-import { useSearchStore } from '@/store/searchStore';
-import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 
-export function SearchFilters() {
-  const t = useTranslations('search.filters');
-  const { filters, setFilters, resetFilters } = useSearchStore();
-  const [expandedSections, setExpandedSections] = useState({
-    year: true,
-    category: true,
-    court: true,
-    language: true
-  });
+interface SearchFiltersProps {
+  filters: {
+    category?: string;
+    year?: string;
+    section?: string;
+  };
+  onChange: (filters: any) => void;
+}
 
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
+export function SearchFilters({ filters, onChange }: SearchFiltersProps) {
+  const handleReset = () => {
+    onChange({
+      category: '',
+      year: '',
+      section: '',
+    });
   };
 
-  const handleYearChange = (type: 'from' | 'to', value: string) => {
-    setFilters({
+  const handleChange = (key: string, value: string) => {
+    onChange({
       ...filters,
-      yearRange: {
-        ...filters.yearRange,
-        [type]: value ? parseInt(value) : undefined
-      }
+      [key]: value,
     });
   };
 
   const categories = [
-    'criminal', 'civil', 'constitutional', 'corporate',
-    'family', 'labor', 'tax', 'environmental'
+    { value: '', label: 'All Categories' },
+    { value: 'criminal', label: 'Criminal' },
+    { value: 'civil', label: 'Civil' },
+    { value: 'constitutional', label: 'Constitutional' },
+    { value: 'corporate', label: 'Corporate' },
+    { value: 'family', label: 'Family' },
+    { value: 'labor', label: 'Labor' },
+    { value: 'tax', label: 'Tax' },
+    { value: 'environmental', label: 'Environmental' }
   ];
-
-  const courtTypes = [
-    'supreme', 'highCourt', 'district', 'magistrate', 'tribunal'
-  ];
-
-  const languages = ['english', 'bengali', 'both'];
 
   return (
-    <div className="space-y-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-lg">{t('title')}</h3>
+        <h3 className="font-semibold">Filters</h3>
         <Button
           variant="ghost"
           size="sm"
-          onClick={resetFilters}
+          onClick={handleReset}
           className="text-sm"
         >
           <RotateCcw className="h-3 w-3 mr-1" />
-          {t('reset')}
+          Reset
         </Button>
       </div>
 
-      {/* Year Range Filter */}
-      <div className="border-b pb-4">
-        <button
-          onClick={() => toggleSection('year')}
-          className="flex justify-between items-center w-full text-left font-medium mb-3"
-        >
-          {t('yearRange')}
-          {expandedSections.year ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-        {expandedSections.year && (
-          <div className="flex gap-2">
-            <Input
-              type="number"
-              placeholder={t('from')}
-              min="1947"
-              max={new Date().getFullYear()}
-              value={filters.yearRange?.from || ''}
-              onChange={(e) => handleYearChange('from', e.target.value)}
-              className="w-24"
-            />
-            <span className="self-center">-</span>
-            <Input
-              type="number"
-              placeholder={t('to')}
-              min="1947"
-              max={new Date().getFullYear()}
-              value={filters.yearRange?.to || ''}
-              onChange={(e) => handleYearChange('to', e.target.value)}
-              className="w-24"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Category Filter */}
-      <div className="border-b pb-4">
-        <button
-          onClick={() => toggleSection('category')}
-          className="flex justify-between items-center w-full text-left font-medium mb-3"
-        >
-          {t('category')}
-          {expandedSections.category ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-        {expandedSections.category && (
-          <div className="space-y-2">
-            {categories.map(category => (
-              <label key={category} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filters.categories?.includes(category) || false}
-                  onChange={(e) => {
-                    const newCategories = e.target.checked
-                      ? [...(filters.categories || []), category]
-                      : (filters.categories || []).filter(c => c !== category);
-                    setFilters({ ...filters, categories: newCategories });
-                  }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm">{t(`categories.${category}`)}</span>
-              </label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Category Filter */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Category</label>
+          <select
+            value={filters.category || ''}
+            onChange={(e) => handleChange('category', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {categories.map(cat => (
+              <option key={cat.value} value={cat.value}>
+                {cat.label}
+              </option>
             ))}
-          </div>
-        )}
-      </div>
-
-      {/* Court Type Filter */}
-      <div className="border-b pb-4">
-        <button
-          onClick={() => toggleSection('court')}
-          className="flex justify-between items-center w-full text-left font-medium mb-3"
-        >
-          {t('courtType')}
-          {expandedSections.court ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-        {expandedSections.court && (
-          <div className="space-y-2">
-            {courtTypes.map(court => (
-              <label key={court} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filters.courtTypes?.includes(court) || false}
-                  onChange={(e) => {
-                    const newCourtTypes = e.target.checked
-                      ? [...(filters.courtTypes || []), court]
-                      : (filters.courtTypes || []).filter(c => c !== court);
-                    setFilters({ ...filters, courtTypes: newCourtTypes });
-                  }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm">{t(`courts.${court}`)}</span>
-              </label>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Language Filter */}
-      <div>
-        <button
-          onClick={() => toggleSection('language')}
-          className="flex justify-between items-center w-full text-left font-medium mb-3"
-        >
-          {t('language')}
-          {expandedSections.language ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-        {expandedSections.language && (
-          <div className="space-y-2">
-            {languages.map(lang => (
-              <label key={lang} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="language"
-                  value={lang}
-                  checked={filters.language === lang}
-                  onChange={() => setFilters({ ...filters, language: lang })}
-                  className="text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm">{t(`languages.${lang}`)}</span>
-              </label>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Active Filters Count */}
-      {Object.values(filters).some(v => v && (Array.isArray(v) ? v.length > 0 : true)) && (
-        <div className="pt-4 text-sm text-gray-600 dark:text-gray-400">
-          {t('activeFilters', {
-            count: Object.values(filters).filter(v => v && (Array.isArray(v) ? v.length > 0 : true)).length
-          })}
+          </select>
         </div>
-      )}
+
+        {/* Year Filter */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Year</label>
+          <Input
+            type="number"
+            placeholder="e.g., 2020"
+            value={filters.year || ''}
+            onChange={(e) => handleChange('year', e.target.value)}
+            min="1947"
+            max={new Date().getFullYear()}
+          />
+        </div>
+
+        {/* Section Filter */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Section</label>
+          <Input
+            type="text"
+            placeholder="e.g., Section 302"
+            value={filters.section || ''}
+            onChange={(e) => handleChange('section', e.target.value)}
+          />
+        </div>
+      </div>
     </div>
   );
 }

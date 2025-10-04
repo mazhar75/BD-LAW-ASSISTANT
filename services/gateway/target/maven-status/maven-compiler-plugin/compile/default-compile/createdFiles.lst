@@ -7,6 +7,7 @@ com\bdlaw\gateway\entity\UsageTracking.class
 com\bdlaw\gateway\dto\LoginResponse$LoginResponseBuilder.class
 com\bdlaw\gateway\dto\LoginResponse$UserDto$UserDtoBuilder.class
 com\bdlaw\gateway\config\SwaggerConfig.class
+com\bdlaw\gateway\service\UserBookmarkService.class
 com\bdlaw\gateway\entity\ApiKey.class
 com\bdlaw\gateway\entity\PasswordResetToken.class
 com\bdlaw\gateway\config\SimpleSecurityConfig.class
@@ -20,6 +21,7 @@ com\bdlaw\gateway\entity\UserPreferences.class
 com\bdlaw\gateway\entity\EmailVerificationToken$EmailVerificationTokenBuilder.class
 com\bdlaw\gateway\security\JwtTokenProvider.class
 com\bdlaw\gateway\interceptor\UsageTrackingInterceptor.class
+com\bdlaw\gateway\dto\BookmarkResponse.class
 com\bdlaw\gateway\service\RateLimitService$UserType.class
 com\bdlaw\gateway\repository\UserPreferencesRepository.class
 com\bdlaw\gateway\dto\ResetPasswordRequest$ResetPasswordRequestBuilder.class
@@ -36,7 +38,10 @@ com\bdlaw\gateway\dto\LoginResponse.class
 com\bdlaw\gateway\config\WebMvcConfig.class
 com\bdlaw\gateway\service\RateLimitService.class
 com\bdlaw\gateway\dto\LoginResponse$UserDto.class
+com\bdlaw\gateway\entity\UserBookmark.class
 com\bdlaw\gateway\repository\UserRepository.class
+com\bdlaw\gateway\dto\BookmarkRequest.class
+com\bdlaw\gateway\dto\UpdateBookmarkRequest.class
 com\bdlaw\gateway\entity\JsonbConverter.class
 com\bdlaw\gateway\entity\EmailVerificationToken.class
 com\bdlaw\gateway\entity\Role$RoleBuilder.class
@@ -46,11 +51,15 @@ com\bdlaw\gateway\repository\UsageTrackingRepository.class
 com\bdlaw\gateway\service\RateLimitService$RateLimitResult.class
 com\bdlaw\gateway\service\EmailService.class
 com\bdlaw\gateway\security\JwtAuthenticationFilter.class
+com\bdlaw\gateway\dto\SyncResponse.class
+com\bdlaw\gateway\entity\UserBookmark$UserBookmarkBuilder.class
 com\bdlaw\gateway\repository\PasswordResetTokenRepository.class
 com\bdlaw\gateway\controller\UserProfileController.class
 com\bdlaw\gateway\service\UserService.class
 com\bdlaw\gateway\entity\User.class
 com\bdlaw\gateway\dto\ResetPasswordRequest.class
+com\bdlaw\gateway\repository\UserBookmarkRepository.class
+com\bdlaw\gateway\controller\BookmarkController.class
 com\bdlaw\gateway\config\RedisConfig.class
 com\bdlaw\gateway\entity\Role.class
 com\bdlaw\gateway\GatewayApplication.class

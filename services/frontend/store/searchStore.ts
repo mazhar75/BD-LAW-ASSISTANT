@@ -106,6 +106,7 @@ export const useSearchStore = create<SearchStore>()(
         set({ loading: true, error: null, query });
 
         try {
+          // Call real search service (which calls RAG through Gateway)
           const response = await searchService.search({
             query,
             searchType: state.searchType,
@@ -115,49 +116,10 @@ export const useSearchStore = create<SearchStore>()(
             sortBy: state.sortBy
           });
 
-          // Mock data for development
-          const mockResults: SearchResult[] = [
-            {
-              id: '1',
-              title: 'Bangladesh Constitution Article 32',
-              lawNumber: 'CONST-32-1972',
-              date: '1972-12-16',
-              court: 'supreme',
-              category: 'constitutional',
-              snippet: 'No person shall be deprived of life or personal liberty save in accordance with law...',
-              relevance: 0.95,
-              url: '/laws/constitution/article-32',
-              similarCount: 5
-            },
-            {
-              id: '2',
-              title: 'Criminal Procedure Code Section 144',
-              lawNumber: 'CPC-144-1898',
-              date: '1898-03-22',
-              court: 'highCourt',
-              category: 'criminal',
-              snippet: 'Power to issue order in urgent cases of nuisance or apprehended danger...',
-              relevance: 0.82,
-              url: '/laws/cpc/section-144',
-              similarCount: 3
-            },
-            {
-              id: '3',
-              title: 'Labour Act 2006 - Working Hours',
-              lawNumber: 'LA-2006-CH5',
-              date: '2006-10-11',
-              court: 'tribunal',
-              category: 'labor',
-              snippet: 'No adult worker shall be required or allowed to work in an establishment for more than eight hours in a day...',
-              relevance: 0.78,
-              url: '/laws/labour/working-hours',
-              similarCount: 8
-            }
-          ];
-
+          // Use real results from API
           set({
-            results: mockResults,
-            totalResults: 150,
+            results: response.results,
+            totalResults: response.totalResults,
             error: null
           });
 
@@ -165,26 +127,29 @@ export const useSearchStore = create<SearchStore>()(
           get().addToHistory(query);
 
         } catch (error: any) {
-          set({ error: error.message });
+          console.error('Search error:', error);
+          set({
+            error: error.message || 'Search failed. Please try again.',
+            results: [],
+            totalResults: 0
+          });
         } finally {
           set({ loading: false });
         }
       },
 
       getSuggestions: async (query) => {
-        try {
-          const suggestions = await searchService.getSuggestions(query);
-          // Mock suggestions for development
-          return [
-            `${query} bangladesh`,
-            `${query} law`,
-            `${query} act`,
-            `${query} section`,
-            `${query} article`
-          ].slice(0, 5);
-        } catch (error) {
-          return [];
-        }
+        // Mock suggestions for development (API not implemented yet)
+        // TODO: Replace with actual API call when backend is ready
+        if (!query || query.length < 2) return [];
+
+        return [
+          `${query} bangladesh law`,
+          `${query} act`,
+          `${query} section`,
+          `${query} article`,
+          `${query} constitution`
+        ].slice(0, 5);
       }
     }),
     {

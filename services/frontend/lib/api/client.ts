@@ -25,11 +25,13 @@ export const tokenManager = {
         expires: 1, // 1 day
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
+        path: '/'
       });
       Cookies.set(config.tokenKeys.refresh, refreshToken, {
         expires: 7, // 7 days
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
+        path: '/'
       });
     }
   },
@@ -146,10 +148,17 @@ gatewayClient.interceptors.response.use(
         }
         return gatewayClient(originalRequest);
       } catch (refreshError) {
+        console.error('Token refresh failed, redirecting to login');
         processQueue(refreshError as AxiosError, null);
         tokenManager.clearTokens();
+
+        // Clear auth store as well
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          localStorage.removeItem('auth-storage');
+          // Only redirect if not already on login page
+          if (!window.location.pathname.startsWith('/login')) {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(refreshError);
       } finally {

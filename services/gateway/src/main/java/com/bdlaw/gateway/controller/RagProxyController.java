@@ -16,7 +16,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class RagProxyController {
 
-    @Value("${rag.service.url:http://localhost:8000}")
+    @Value("${services.rag.url:http://localhost:8000}")
     private String ragServiceUrl;
 
     private final RestTemplate restTemplate;
@@ -29,7 +29,7 @@ public class RagProxyController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> queryRag(@RequestBody Map<String, Object> request) {
         try {
-            log.info("Proxying RAG query request to: {}/api/v1/query/api/v1/ask", ragServiceUrl);
+            log.info("Proxying RAG query request to: {}/api/v1/qa/answer", ragServiceUrl);
 
             // Prepare the request for the RAG service
             HttpHeaders headers = new HttpHeaders();
@@ -38,26 +38,26 @@ public class RagProxyController {
             // Transform the request to match RAG service expectations
             Map<String, Object> ragRequest = Map.of(
                 "question", request.get("query"),
-                "use_chat_history", true,
                 "include_sources", true,
                 "language", "en"
             );
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(ragRequest, headers);
 
-            // Call the RAG service - note the double prefix due to router configuration
+            // Call the RAG service
             ResponseEntity<Map> ragResponse = restTemplate.exchange(
-                ragServiceUrl + "/api/v1/query/api/v1/ask",
+                ragServiceUrl + "/api/v1/qa/answer",
                 HttpMethod.POST,
                 entity,
                 Map.class
             );
 
             // Transform the response to match frontend expectations
+            Map<String, Object> body = ragResponse.getBody();
             Map<String, Object> response = Map.of(
-                "answer", ragResponse.getBody().getOrDefault("answer", ""),
-                "sources", ragResponse.getBody().getOrDefault("source_documents", new Object[0]),
-                "confidence", ragResponse.getBody().getOrDefault("confidence_score", 0.0)
+                "answer", body.getOrDefault("answer", ""),
+                "sources", body.getOrDefault("sources", new Object[0]),
+                "confidence", body.getOrDefault("confidence", 0.0)
             );
 
             return ResponseEntity.ok(response);
@@ -73,25 +73,41 @@ public class RagProxyController {
         }
     }
 
-    @GetMapping("/search")
+    @PostMapping("/search")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> searchDocuments(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "10") int limit) {
+    public ResponseEntity<?> searchDocuments(@RequestBody Map<String, Object> request) {
         try {
-            log.info("Proxying search request to RAG service");
+            String query = (String) request.getOrDefault("query", "");
+            Integer limit = (Integer) request.getOrDefault("limit", 10);
 
-            String url = String.format("%s/api/v1/search?query=%s&k=%d",
-                ragServiceUrl, query, limit);
+            log.info("Proxying search request to RAG service: query={}, limit={}", query, limit);
 
-            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            // Prepare request for RAG service
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> ragRequest = Map.of(
+                "query", query,
+                "top_k", limit,
+                "language", "en"
+            );
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(ragRequest, headers);
+
+            // Call RAG service search endpoint
+            ResponseEntity<Map> response = restTemplate.exchange(
+                ragServiceUrl + "/api/v1/search",
+                HttpMethod.POST,
+                entity,
+                Map.class
+            );
 
             return ResponseEntity.ok(response.getBody());
 
         } catch (Exception e) {
             log.error("Error in search proxy: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Failed to search documents"));
+                .body(Map.of("error", "Failed to search documents: " + e.getMessage()));
         }
     }
 

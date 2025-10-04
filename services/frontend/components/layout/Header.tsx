@@ -9,14 +9,24 @@ import { useAuthStore } from '@/store/authStore';
 
 export function Header() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, clearAuth } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleLogout = async () => {
-    // Call logout from auth hook
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
+    try {
+      // Call backend logout endpoint
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout API error:', error);
+    } finally {
+      // Clear auth state and cookies
+      clearAuth();
+      // Clear localStorage
+      localStorage.removeItem('auth-storage');
+      // Redirect to login
+      router.push('/login');
+    }
   };
 
   return (

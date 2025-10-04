@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuthStore } from '@/store/authStore';
 import { userService } from '@/lib/api/services/user.service';
+import gatewayClient from '@/lib/api/client';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import {
@@ -43,8 +44,134 @@ export default function DashboardPage() {
   const fetchUsageData = async () => {
     try {
       setIsLoading(true);
-      const response = await userService.getUsage();
-      setUsage(response);
+
+      // Fetch usage statistics
+      const usageResponse = await userService.getUsage();
+
+      // Fetch bookmark count
+      let bookmarkCount = 0;
+      try {
+        const bookmarkResponse = await gatewayClient.get('/api/bookmarks/count');
+        console.log('[Dashboard] Bookmark count response:', {
+          data: bookmarkResponse.data,
+          type: typeof bookmarkResponse.data,
+          fullResponse: bookmarkResponse
+        });
+        // The endpoint returns a Long directly, so data is the number
+        bookmarkCount = typeof bookmarkResponse.data === 'number' ? bookmarkResponse.data : 0;
+        console.log('[Dashboard] Final bookmark count:', bookmarkCount);
+      } catch (err) {
+        console.error('[Dashboard] Failed to fetch bookmark count:', err);
+        // Try alternative: count from getAll if count endpoint fails
+        try {
+          const allBookmarks = await gatewayClient.get('/api/bookmarks?page=0&size=1');
+          console.log('[Dashboard] Bookmark page response:', allBookmarks.data);
+          bookmarkCount = allBookmarks.data?.totalElements || 0;
+          console.log('[Dashboard] Bookmark count from page:', bookmarkCount);
+        } catch (err2) {
+          console.error('[Dashboard] Failed to fetch bookmarks page:', err2);
+        }
+      }
+
+      // Transform backend data to dashboard format
+      const summary = usageResponse?.summary || {};
+      const usageData = usageResponse?.usage || [];
+      const totalRequests = summary.totalRequests || 0;
+
+      console.log('[Dashboard] Processing usage data:', {
+        totalRequests,
+        usageRecords: usageData.length,
+        endpoints: usageData.map((u: any) => u.endpoint)
+      });
+
+      // Calculate metrics from usage data
+      // Note: Endpoints are logged with /api prefix (e.g., /api/rag/search)
+      const searchEndpoints = usageData.filter((u: any) =>
+        u.endpoint?.includes('/api/rag/search')
+      );
+      const searchCount = searchEndpoints.length;
+      console.log('[Dashboard] Search count:', searchCount, 'from endpoints:', searchEndpoints.map((u: any) => u.endpoint));
+
+      const chatEndpoints = usageData.filter((u: any) =>
+        u.endpoint?.includes('/api/rag/query') // RAG query is used for chat
+      );
+      const chatCount = chatEndpoints.length;
+      console.log('[Dashboard] Chat count:', chatCount, 'from endpoints:', chatEndpoints.map((u: any) => u.endpoint));
+
+      const lawsViewedCount = usageData.filter((u: any) =>
+        u.endpoint?.includes('/api/laws/') ||
+        u.endpoint?.includes('/api/documents/') ||
+        u.endpoint?.includes('/api/rag/query') || // RAG queries also count as viewing laws
+        u.endpoint?.includes('/api/rag/search') // Search also counts as viewing
+      ).length;
+      console.log('[Dashboard] Laws viewed count:', lawsViewedCount);
+
+      // Calculate weekly stats (last 7 days)
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      const weeklyData = usageData.filter((u: any) =>
+        new Date(u.date) >= weekAgo
+      );
+
+      const weeklySearches = weeklyData.filter((u: any) =>
+        u.endpoint?.includes('/api/rag/search')
+      ).length;
+
+      const weeklyChats = weeklyData.filter((u: any) =>
+        u.endpoint?.includes('/api/rag/query')
+      ).length;
+
+      // Calculate time spent (sum of response times)
+      const totalTimeMs = weeklyData.reduce((sum: number, u: any) =>
+        sum + (u.responseTimeMs || 0), 0
+      );
+      const totalTimeMinutes = Math.round(totalTimeMs / 1000 / 60);
+      const hours = Math.floor(totalTimeMinutes / 60);
+      const minutes = totalTimeMinutes % 60;
+      const weeklyTime = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+
+      // Transform recent activity
+      const recentActivity = usageData.slice(0, 10).map((u: any) => {
+        let type = 'other';
+        let title = 'API Request';
+        let description = u.endpoint;
+
+        if (u.endpoint?.includes('/api/rag/search')) {
+          type = 'search';
+          title = 'Searched Laws';
+          description = u.query || 'Legal document search';
+        } else if (u.endpoint?.includes('/api/rag/query')) {
+          type = 'question';
+          title = 'Asked Question';
+          description = u.query || 'Legal question in chat';
+        } else if (u.endpoint?.includes('/api/bookmarks')) {
+          type = 'view';
+          title = 'Bookmarks';
+          description = 'Accessed bookmarks';
+        } else if (u.endpoint?.includes('/api/user/')) {
+          // Don't show internal user API calls
+          return null;
+        }
+
+        return {
+          type,
+          title,
+          description,
+          timestamp: u.date
+        };
+      }).filter(Boolean); // Remove null entries
+
+      setUsage({
+        totalSearches: searchCount,
+        totalQuestions: chatCount,
+        lawsViewed: lawsViewedCount,
+        savedItems: bookmarkCount,
+        weeklySearches,
+        weeklyQuestions: weeklyChats,
+        weeklyTime,
+        recentActivity
+      });
     } catch (error) {
       console.error('Failed to fetch usage data:', error);
       const apiError = error as ApiError;
@@ -56,13 +183,12 @@ export default function DashboardPage() {
 
   const stats = [
     {
-      title: 'Total Searches',
+      title: 'Total Requests',
       value: usage?.totalSearches || 0,
       icon: Search,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
-      change: '+12%',
-      trend: 'up'
+      description: 'All-time API requests'
     },
     {
       title: 'Questions Asked',
@@ -70,8 +196,7 @@ export default function DashboardPage() {
       icon: MessageSquare,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
-      change: '+8%',
-      trend: 'up'
+      description: 'Chat conversations'
     },
     {
       title: 'Laws Viewed',
@@ -79,17 +204,15 @@ export default function DashboardPage() {
       icon: BookOpen,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
-      change: '+15%',
-      trend: 'up'
+      description: 'Documents accessed'
     },
     {
-      title: 'Saved Items',
+      title: 'Saved Bookmarks',
       value: usage?.savedItems || 0,
       icon: FileText,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
-      change: '+5%',
-      trend: 'up'
+      description: 'Bookmarked items'
     }
   ];
 
@@ -130,17 +253,9 @@ export default function DashboardPage() {
               ) : (
                 <>
                   <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    {stat.trend === 'up' ? (
-                      <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                    ) : (
-                      <TrendingUp className="h-3 w-3 text-red-500 mr-1 rotate-180" />
-                    )}
-                    <span className={stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}>
-                      {stat.change}
-                    </span>
-                    <span className="ml-1">from last month</span>
-                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stat.description}
+                  </p>
                 </>
               )}
             </CardContent>

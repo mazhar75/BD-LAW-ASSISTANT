@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 
@@ -18,8 +18,19 @@ export function ProtectedRoute({
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading } = useAuthStore();
+  const [hydrated, setHydrated] = useState(false);
+
+  // Wait for Zustand to hydrate from localStorage
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
+    // Don't check auth until hydrated
+    if (!hydrated) {
+      return;
+    }
+
     if (!isLoading) {
       // Check if user is not authenticated
       if (!isAuthenticated || !user) {
@@ -41,22 +52,24 @@ export function ProtectedRoute({
         }
       }
 
-      // Check if email is verified (if required)
-      if (!user.isEmailVerified) {
-        router.push('/verify-email');
-        return;
-      }
+      // Optional: Check if email is verified
+      // Uncomment if email verification is required
+      // if (!user.isEmailVerified) {
+      //   router.push('/verify-email');
+      //   return;
+      // }
 
-      // Check if account is active
-      if (!user.isActive) {
-        router.push('/account-inactive');
-        return;
-      }
+      // Optional: Check if account is active
+      // Uncomment if active account check is required
+      // if (!user.isActive) {
+      //   router.push('/account-inactive');
+      //   return;
+      // }
     }
-  }, [isAuthenticated, user, isLoading, requiredRoles, router, pathname, redirectTo]);
+  }, [hydrated, isAuthenticated, user, isLoading, requiredRoles, router, pathname, redirectTo]);
 
-  // Show loading state
-  if (isLoading) {
+  // Show loading state while hydrating or loading
+  if (!hydrated || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

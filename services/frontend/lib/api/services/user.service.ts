@@ -76,38 +76,47 @@ class UserService {
     return response.data;
   }
 
-  async getUsage(): Promise<UserUsage> {
-    // Mock data for development
-    return {
-      totalSearches: 142,
-      totalChats: 38,
-      bookmarkedLaws: 27,
-      thisWeek: {
-        searches: 12,
-        chats: 5
-      },
-      thisMonth: {
-        searches: 48,
-        chats: 15
-      },
-      recentSearches: [
-        'Constitution Article 32',
-        'Labour Act 2006',
-        'Criminal Procedure Code'
-      ],
-      recentChats: [
-        {
-          id: '1',
-          title: 'Rights under Constitution',
-          date: '2025-09-19'
-        },
-        {
-          id: '2',
-          title: 'Labor law violations',
-          date: '2025-09-18'
+  async getUsage(): Promise<any> {
+    try {
+      // Fetch more records (100 instead of 20) to get all recent activity
+      const response = await gatewayClient.get('/api/user/usage?page=0&size=100');
+      console.log('[UserService] Usage data fetched:', {
+        total: response.data.totalElements,
+        records: response.data.usage?.length,
+        summary: response.data.summary
+      });
+      // Log first few endpoints to see what's being tracked
+      if (response.data.usage && response.data.usage.length > 0) {
+        console.log('[UserService] Sample endpoints:',
+          response.data.usage.slice(0, 5).map((u: any) => ({
+            endpoint: u.endpoint,
+            method: u.method,
+            query: u.query
+          }))
+        );
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch usage data:', error);
+      return {
+        usage: [],
+        summary: {
+          totalRequests: 0,
+          averageResponseTime: 0,
+          topEndpoints: []
         }
-      ]
-    };
+      };
+    }
+  }
+
+  async getDailyUsage(days: number = 30): Promise<any[]> {
+    try {
+      const response = await gatewayClient.get(`/api/user/usage/daily?days=${days}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch daily usage:', error);
+      return [];
+    }
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {

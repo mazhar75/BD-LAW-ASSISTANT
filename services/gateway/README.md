@@ -1,570 +1,284 @@
 # BD Law API Gateway
 
-## Overview
+Central API gateway for Bangladesh Law Assistant providing authentication, authorization, rate limiting, and service routing.
 
-The API Gateway is the central entry point for the Bangladesh Law Assistant microservices ecosystem. Built with Spring Boot 3.2, it provides authentication, authorization, rate limiting, and intelligent routing to backend services including RAG, Scraper, and future microservices.
+## 🚀 Technology Stack
 
-## Features
+- **Framework**: Spring Boot 3.2.0
+- **Language**: Java 17
+- **Security**: Spring Security + JWT (jjwt 0.11.5)
+- **Database**: PostgreSQL 14+ (JPA/Hibernate)
+- **Caching**: Redis 7+ (rate limiting, sessions)
+- **Build Tool**: Maven 3.8+
+- **Documentation**: SpringDoc OpenAPI 2.3.0
 
-- **JWT Authentication** - Secure token-based authentication with access and refresh tokens
-- **User Management** - Registration, login, email verification, and password reset
-- **Rate Limiting** - Redis-based tiered rate limiting (Anonymous, User, Premium, Admin)
-- **Request Routing** - Intelligent proxy routing to backend microservices
-- **Role-Based Access Control** - Fine-grained permissions (USER, ADMIN, PREMIUM)
-- **CORS Support** - Configurable cross-origin resource sharing
-- **Health Monitoring** - Spring Actuator endpoints for monitoring
-- **API Documentation** - OpenAPI/Swagger UI at `/swagger-ui.html`
+## ✨ Key Features
 
-## Architecture
+### Authentication & Authorization
+- JWT-based authentication (access + refresh tokens)
+- User registration and login
+- Password encryption (BCrypt)
+- Token refresh mechanism
+- Role-based access control (USER, PREMIUM, ADMIN)
+
+### User Management
+- Complete user CRUD operations
+- User profile management
+- Password change/reset
+- Email verification (future)
+
+### Usage Tracking & Analytics
+- **UsageTrackingInterceptor**: Tracks all authenticated API calls
+- Records endpoint, method, response time, status code
+- User-specific usage statistics
+- Daily aggregated metrics
+- Real-time analytics dashboard data
+
+### Bookmark Management
+- Create, read, update, delete bookmarks
+- Support for search results, chat citations, law documents
+- Folder and tag organization
+- Bulk operations (sync, delete)
+- User-specific bookmark isolation
+
+### Rate Limiting
+- Redis-based distributed rate limiting
+- Tiered limits by role:
+  - Anonymous: 10 requests/hour
+  - User: 100 requests/hour
+  - Premium: 1000 requests/hour
+  - Admin: Unlimited
+- Per-endpoint rate limiting
+
+### Service Routing
+- Proxy to RAG service (`/api/rag/*`)
+- Proxy to Scraper service (future)
+- Request/response transformation
+- Error handling and fallbacks
+
+## 📁 Project Structure
 
 ```
-┌─────────┐
-│ Client  │
-└────┬────┘
-     │
-     ↓
-┌──────────────────────────────────────┐
-│   API Gateway (Port 8081)            │
-│                                      │
-│  ┌────────────────────────────────┐ │
-│  │  Security Filter Chain         │ │
-│  │  • JWT Authentication          │ │
-│  │  • Rate Limiting (Redis)       │ │
-│  │  • CORS Validation             │ │
-│  │  • Request Logging             │ │
-│  └────────────────────────────────┘ │
-└──────────────────────────────────────┘
-     │
-     ├──────────────────┬──────────────────┐
-     ↓                  ↓                  ↓
-┌─────────┐      ┌─────────┐      ┌─────────┐
-│   RAG   │      │ Scraper │      │ Future  │
-│ Service │      │ Service │      │Services │
-│  :8000  │      │  :8001  │      │         │
-└─────────┘      └─────────┘      └─────────┘
+services/gateway/
+├── src/main/java/com/bdlaw/gateway/
+│   ├── config/              # Configuration classes
+│   │   ├── SecurityConfig.java
+│   │   ├── RedisConfig.java
+│   │   └── WebConfig.java
+│   ├── controller/          # REST controllers
+│   │   ├── AuthController.java
+│   │   ├── UserController.java
+│   │   ├── BookmarkController.java
+│   │   ├── RagProxyController.java
+│   │   └── ProxyController.java
+│   ├── dto/                 # Data Transfer Objects
+│   │   ├── LoginRequest.java
+│   │   ├── RegisterRequest.java
+│   │   ├── BookmarkRequest.java
+│   │   └── BookmarkResponse.java
+│   ├── entity/              # JPA Entities
+│   │   ├── User.java
+│   │   ├── UserBookmark.java
+│   │   ├── RefreshToken.java
+│   │   └── UserUsage.java
+│   ├── repository/          # Spring Data repositories
+│   │   ├── UserRepository.java
+│   │   ├── UserBookmarkRepository.java
+│   │   ├── RefreshTokenRepository.java
+│   │   └── UserUsageRepository.java
+│   ├── service/             # Business logic
+│   │   ├── UserService.java
+│   │   ├── AuthService.java
+│   │   ├── JwtService.java
+│   │   ├── UserBookmarkService.java
+│   │   └── RateLimitService.java
+│   ├── security/            # Security components
+│   │   ├── JwtAuthenticationFilter.java
+│   │   └── UserDetailsServiceImpl.java
+│   ├── interceptor/         # HTTP interceptors
+│   │   └── UsageTrackingInterceptor.java
+│   ├── filter/              # Servlet filters
+│   │   └── RateLimitFilter.java
+│   └── util/                # Utility classes
+│       └── JwtUtil.java
+│
+├── src/main/resources/
+│   ├── application.properties
+│   ├── application-dev.properties
+│   ├── application-prod.properties
+│   └── db/migration/        # Database migrations
+│
+├── pom.xml                  # Maven dependencies
+└── README.md
 ```
 
-### Component Interactions
+## 🔧 Environment Variables
 
-1. **Client Request** → Gateway receives HTTP request
-2. **Authentication** → JWT token validated (if required)
-3. **Rate Limiting** → Redis checks request count
-4. **Authorization** → Role-based access control applied
-5. **Routing** → Request proxied to appropriate backend service
-6. **Response** → Service response returned to client with headers
-
-## Tech Stack
-
-| Component | Technology | Version |
-|-----------|------------|---------|
-| Framework | Spring Boot | 3.2.0 |
-| Language | Java | 17+ |
-| Build Tool | Maven | 3.8+ |
-| Security | Spring Security + JWT | jjwt 0.11.5 |
-| Database | PostgreSQL | 14+ |
-| Cache | Redis | 7+ |
-| Documentation | SpringDoc OpenAPI | 2.3.0 |
-| Monitoring | Micrometer + Prometheus | - |
-
-## Prerequisites
-
-- **Java 17+** - JDK installed and configured
-- **Maven 3.8+** - Build tool
-- **PostgreSQL 14+** - For user data and sessions
-- **Redis 7+** - For rate limiting and caching
-- **RAG Service** - Running on port 8000 (for proxying)
-
-## Installation
-
-### 1. Database Setup
-
-```bash
-# Start PostgreSQL and create database
-psql -U postgres
-
-CREATE DATABASE bdlaw;
-
-# Run schema initialization
-psql -U postgres -d bdlaw -f src/main/resources/schema.sql
-```
-
-### 2. Redis Setup
-
-```bash
-# Option 1: Native Redis
-redis-server --port 6379
-
-# Option 2: Docker
-docker run -d --name redis -p 6379:6379 redis:7-alpine
-```
-
-### 3. Configuration
-
-Copy the environment template:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your configuration:
-
-```bash
+```env
 # Database
-DB_USER=postgres
-DB_PASSWORD=your_secure_password
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=bdlaw
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
+
+# JWT
+JWT_SECRET=your-256-bit-secret-key-minimum-32-characters
+JWT_EXPIRATION=3600000
+JWT_REFRESH_EXPIRATION=604800000
 
 # Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
-# JWT Secret (generate with: openssl rand -base64 64)
-JWT_SECRET=your-256-bit-secret-key
-
-# Service URLs
+# Backend Services
 RAG_SERVICE_URL=http://localhost:8000
+SCRAPER_SERVICE_URL=http://localhost:8001
+
+# Server
+SERVER_PORT=8081
 ```
 
-### 4. Build
+## 📦 Installation
 
 ```bash
 cd services/gateway
-mvn clean package
+cp .env.example .env
+# Edit .env with your configuration
+mvn clean install
 ```
 
-### 5. Run
+## 🏃 Running
 
 ```bash
-# Using Maven
-mvn spring-boot:run -Dspring-boot.run.arguments="\
-  --DB_PASSWORD=your_password \
-  --JWT_SECRET=your_secret \
-  --RAG_SERVICE_URL=http://localhost:8000"
+# Development
+mvn spring-boot:run
 
-# Or using JAR
-java -jar target/gateway-1.0.0.jar \
-  --DB_PASSWORD=your_password \
-  --JWT_SECRET=your_secret
+# With environment variables
+mvn spring-boot:run \
+  -Dspring-boot.run.arguments="\
+    --DB_PASSWORD=yourpass \
+    --JWT_SECRET=your-secret-key"
+
+# Production (JAR)
+java -jar target/gateway-1.0.0.jar
 ```
 
-The gateway starts on **http://localhost:8081**
+Access at `http://localhost:8081`
 
-## API Endpoints
+## 🔑 API Endpoints
 
-### Public Endpoints
-
-#### Health Check
-```http
-GET /actuator/health
+### Authentication
+```
+POST   /api/auth/register    - Register new user
+POST   /api/auth/login       - Login user
+POST   /api/auth/refresh     - Refresh access token
+POST   /api/auth/logout      - Logout user
 ```
 
-Returns gateway health status including database and Redis connectivity.
-
-#### User Registration
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "username": "johndoe",
-  "email": "john@example.com",
-  "password": "SecurePass123!",
-  "fullName": "John Doe"
-}
+### User Management
+```
+GET    /api/user/me          - Get current user
+GET    /api/user/profile     - Get user profile
+PUT    /api/user/profile     - Update profile
+GET    /api/user/usage       - Get usage statistics
+GET    /api/user/usage/daily - Get daily usage
+POST   /api/user/change-password
+DELETE /api/user/account
 ```
 
-**Response:**
-```json
-{
-  "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
-  "tokenType": "Bearer",
-  "expiresIn": 86400,
-  "user": {
-    "id": 1,
-    "username": "johndoe",
-    "roles": ["ROLE_USER"]
-  }
-}
+### Bookmarks
+```
+POST   /api/bookmarks            - Create bookmark
+GET    /api/bookmarks            - List bookmarks
+GET    /api/bookmarks/{id}       - Get bookmark
+PUT    /api/bookmarks/{id}       - Update bookmark
+DELETE /api/bookmarks/{id}       - Delete bookmark
+GET    /api/bookmarks/count      - Get count
+POST   /api/bookmarks/sync       - Sync bookmarks
 ```
 
-#### User Login
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "username": "johndoe",
-  "password": "SecurePass123!"
-}
+### RAG Proxy
+```
+POST   /api/rag/search   - Search laws
+POST   /api/rag/query    - Ask question
+GET    /api/rag-health   - Health check
 ```
 
-**Note:** Currently has a known issue (401 Unauthorized) - requires security configuration update.
+## 🗄️ Database Schema
 
-### Protected Endpoints
-
-All protected endpoints require the `Authorization` header:
-
-```http
-Authorization: Bearer <access_token>
+### Users Table
+```sql
+CREATE TABLE auth.users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100),
+    phone_number VARCHAR(20),
+    role VARCHAR(20) DEFAULT 'USER',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-#### Refresh Token
-```http
-POST /api/auth/refresh
-Content-Type: application/json
-
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiJ9..."
-}
+### Bookmarks Table
+```sql
+CREATE TABLE auth.user_bookmarks (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    item_id VARCHAR(200) NOT NULL,
+    bookmark_type VARCHAR(50) NOT NULL,
+    title VARCHAR(500) NOT NULL,
+    excerpt TEXT,
+    category VARCHAR(100),
+    url VARCHAR(500),
+    tags TEXT[],
+    folder_name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, item_id)
+);
 ```
 
-#### RAG Service Proxy
-
-The gateway proxies requests to the RAG service at `/api/rag/**`:
-
-**Search (Public)**
-```http
-POST /api/rag/search
-Content-Type: application/json
-
-{
-  "query": "property law in Bangladesh",
-  "limit": 5
-}
+### Usage Tracking Table
+```sql
+CREATE TABLE auth.user_usage (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    endpoint VARCHAR(255),
+    method VARCHAR(10),
+    status_code INTEGER,
+    response_time_ms BIGINT,
+    ip_address VARCHAR(50),
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-**Q&A (Protected)**
-```http
-POST /api/rag/qa
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "question": "What are the property rights?"
-}
-```
-
-### Rate Limiting
-
-All responses include rate limit headers:
-
-```
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 99
-X-RateLimit-Reset: 1759420000
-```
-
-**Default Limits:**
-- Anonymous: 10 requests/minute
-- Authenticated: 100 requests/minute
-- Premium: 1000 requests/minute
-
-## Configuration Reference
-
-### Environment Variables
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `DB_USER` | PostgreSQL username | postgres | No |
-| `DB_PASSWORD` | PostgreSQL password | - | Yes |
-| `REDIS_HOST` | Redis server host | localhost | No |
-| `REDIS_PORT` | Redis server port | 6379 | No |
-| `JWT_SECRET` | JWT signing secret | - | Yes |
-| `JWT_EXPIRATION` | Access token expiry (ms) | 86400000 | No |
-| `JWT_REFRESH_EXPIRATION` | Refresh token expiry (ms) | 604800000 | No |
-| `RAG_SERVICE_URL` | RAG service URL | http://localhost:8000 | No |
-| `RATE_LIMIT_ANONYMOUS` | Anonymous rate limit | 10 | No |
-| `RATE_LIMIT_AUTHENTICATED` | User rate limit | 100 | No |
-| `RATE_LIMIT_PREMIUM` | Premium rate limit | 1000 | No |
-
-### Application Properties
-
-Key configuration in `src/main/resources/application.yml`:
-
-```yaml
-server:
-  port: 8081
-
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/bdlaw
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD}
-
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-
-  cloud:
-    gateway:
-      routes:
-        - id: rag-service
-          uri: ${RAG_SERVICE_URL:http://localhost:8000}
-          predicates:
-            - Path=/api/rag/**
-          filters:
-            - StripPrefix=2
-            - RateLimit
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:86400000}
-  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
-```
-
-## Monitoring
-
-### Actuator Endpoints
+## 🧪 Testing
 
 ```bash
-# Health status
-GET /actuator/health
-
-# Application metrics
-GET /actuator/metrics
-
-# Prometheus metrics
-GET /actuator/prometheus
-
-# All available endpoints
-GET /actuator
-```
-
-### API Documentation
-
-Access Swagger UI for interactive API documentation:
-
-```
-http://localhost:8081/swagger-ui.html
-```
-
-## Project Structure
-
-```
-services/gateway/
-├── src/
-│   ├── main/
-│   │   ├── java/com/bdlaw/gateway/
-│   │   │   ├── config/              # Configuration classes
-│   │   │   │   ├── SecurityConfig.java
-│   │   │   │   ├── RedisConfig.java
-│   │   │   │   └── WebClientConfig.java
-│   │   │   ├── controller/          # REST controllers
-│   │   │   │   ├── AuthController.java
-│   │   │   │   └── UserController.java
-│   │   │   ├── dto/                 # Data transfer objects
-│   │   │   ├── entity/              # JPA entities
-│   │   │   │   ├── User.java
-│   │   │   │   └── Role.java
-│   │   │   ├── repository/          # Spring Data repositories
-│   │   │   ├── security/            # Security components
-│   │   │   │   ├── JwtAuthenticationFilter.java
-│   │   │   │   └── JwtTokenProvider.java
-│   │   │   ├── service/             # Business logic
-│   │   │   │   ├── AuthService.java
-│   │   │   │   └── UserService.java
-│   │   │   └── GatewayApplication.java
-│   │   └── resources/
-│   │       ├── application.yml      # Main configuration
-│   │       └── schema.sql           # Database schema
-│   └── test/
-│       └── java/                    # Unit & integration tests
-├── .env.example                     # Environment template
-├── .gitignore                       # Git ignore rules
-├── Dockerfile                       # Docker image definition
-├── pom.xml                          # Maven dependencies
-└── README.md
-```
-
-## Security
-
-### Password Requirements
-
-- Minimum 8 characters
-- At least one uppercase letter
-- At least one lowercase letter
-- At least one number
-- At least one special character
-
-### JWT Tokens
-
-- **Access Token**: Short-lived (24 hours default)
-- **Refresh Token**: Long-lived (7 days default)
-- **Algorithm**: HMAC-SHA256 (HS256)
-
-### Security Headers
-
-The gateway automatically adds security headers:
-
-```
-X-Content-Type-Options: nosniff
-X-Frame-Options: DENY
-X-XSS-Protection: 1; mode=block
-Strict-Transport-Security: max-age=31536000
-```
-
-## Testing
-
-### Manual Testing
-
-```bash
-# Test health
-curl http://localhost:8081/actuator/health
-
-# Test registration
-curl -X POST http://localhost:8081/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "Test123!",
-    "fullName": "Test User"
-  }'
-
-# Test RAG search
-curl -X POST http://localhost:8081/api/rag/search \
-  -H "Content-Type: application/json" \
-  -d '{"query": "property law", "limit": 5}'
-```
-
-### Automated Tests
-
-Run the test suite:
-
-```bash
-# Unit tests
+# Run tests
 mvn test
-
-# Integration tests
-mvn verify
-
-# Full test suite with report
-python test_gateway_endpoints.py
-```
-
-See `docs/GATEWAY_TEST_REPORT.md` for detailed test results.
-
-## Troubleshooting
-
-### Common Issues
-
-**Database Connection Error**
-```bash
-# Check PostgreSQL is running
-pg_isready -h localhost -p 5432
-
-# Verify database exists
-psql -U postgres -l | grep bdlaw
-
-# Test connection
-psql -U postgres -d bdlaw -c "SELECT version();"
-```
-
-**Redis Connection Error**
-```bash
-# Check Redis is running
-redis-cli ping
-# Should return: PONG
-
-# Check Redis info
-redis-cli info server
-```
-
-**Port Already in Use**
-```bash
-# Find process using port 8081
-netstat -ano | findstr :8081
-
-# Kill process (Windows)
-taskkill /PID <pid> /F
-
-# Or change port in application.yml
-server.port: 8082
-```
-
-**JWT Token Invalid**
-- Ensure `JWT_SECRET` is consistent across restarts
-- Check system time synchronization
-- Verify token hasn't expired
-
-### Known Issues
-
-1. **Login Endpoint 401 Error** - Login endpoint currently blocked by authentication filter. Requires `SecurityConfig.java` update to whitelist `/api/auth/login`.
-
-2. **Gateway Latency** - Adds ~800ms overhead vs direct service access. Consider connection pooling and caching for production.
-
-See full analysis in `docs/GATEWAY_TEST_REPORT.md`.
-
-## Deployment
-
-### Docker
-
-```bash
-# Build image
-docker build -t bd-law-gateway:1.0.0 .
-
-# Run container
-docker run -d \
-  -p 8081:8081 \
-  -e DB_PASSWORD=your_password \
-  -e JWT_SECRET=your_secret \
-  --name gateway \
-  bd-law-gateway:1.0.0
-```
-
-### Docker Compose
-
-See root `docker-compose.yml` for full stack deployment with all services.
-
-## Development
-
-### Adding New Service Routes
-
-Edit `application.yml`:
-
-```yaml
-spring:
-  cloud:
-    gateway:
-      routes:
-        - id: new-service
-          uri: http://localhost:9000
-          predicates:
-            - Path=/api/new-service/**
-          filters:
-            - StripPrefix=2
-            - name: RateLimit
-              args:
-                redis-rate-limiter.replenishRate: 100
-                redis-rate-limiter.burstCapacity: 200
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-mvn test
-
-# Run specific test class
-mvn test -Dtest=AuthControllerTest
 
 # Generate coverage report
-mvn jacoco:report
+mvn test jacoco:report
 ```
 
-## License
+## 🔐 Security Features
 
-Apache License 2.0
+- BCrypt password hashing
+- JWT token validation
+- CORS configuration
+- CSRF protection
+- Role-based access control
+- Rate limiting per user
+- SQL injection prevention (JPA)
+- XSS protection headers
 
-## Support
+## 📊 Monitoring
 
-- **Documentation**: `docs/GATEWAY_TEST_REPORT.md`
-- **Test Suite**: `test_gateway_endpoints.py`
-- **Issues**: GitHub Issues
+- Spring Boot Actuator endpoints
+- Health checks (`/actuator/health`)
+- Metrics (`/actuator/metrics`)
+- Application logs in `logs/`
 
----
-
-**Version**: 1.0.0
-**Status**: Operational
-**Last Updated**: 2025-10-02

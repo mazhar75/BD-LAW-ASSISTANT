@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Search, X, Clock, Star } from 'lucide-react';
 import { useSearchStore } from '@/store/searchStore';
-import { useTranslations } from 'next-intl';
 import { useDebounce } from '@/hooks/useDebounce';
 
 interface SearchBarProps {
@@ -14,7 +13,6 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ onSearch, initialValue = '' }: SearchBarProps) {
-  const t = useTranslations('search');
   const [query, setQuery] = useState(initialValue);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -90,7 +88,7 @@ export function SearchBar({ onSearch, initialValue = '' }: SearchBarProps) {
               setShowSuggestions(true);
             }}
             onFocus={() => setShowSuggestions(true)}
-            placeholder={t('searchPlaceholder')}
+            placeholder="Search for laws, acts, sections, or legal topics..."
             className="pr-10"
           />
           {query && (
@@ -105,7 +103,7 @@ export function SearchBar({ onSearch, initialValue = '' }: SearchBarProps) {
         </div>
         <Button type="submit" disabled={!query.trim()}>
           <Search className="h-4 w-4 mr-2" />
-          {t('search')}
+          Search
         </Button>
       </form>
 
@@ -123,9 +121,9 @@ export function SearchBar({ onSearch, initialValue = '' }: SearchBarProps) {
               {item.type === 'suggestion' && <Search className="h-4 w-4 text-blue-500" />}
               <span className="flex-1 truncate">{item.text}</span>
               <span className="text-xs text-gray-500">
-                {item.type === 'saved' && t('saved')}
-                {item.type === 'history' && t('recent')}
-                {item.type === 'suggestion' && t('suggested')}
+                {item.type === 'saved' && 'Saved'}
+                {item.type === 'history' && 'Recent'}
+                {item.type === 'suggestion' && 'Suggested'}
               </span>
             </button>
           ))}

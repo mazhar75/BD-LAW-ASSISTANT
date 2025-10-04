@@ -1,167 +1,137 @@
 'use client';
 
-import { useSearchStore } from '@/store/searchStore';
-import { ResultCard } from './ResultCard';
-import { Pagination } from '@/components/ui/Pagination';
-import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/Button';
-import { Download, SortAsc } from 'lucide-react';
-import { useState } from 'react';
-import { ExportDialog } from './ExportDialog';
+import { Card } from '@/components/ui/Card';
+import { FileText, Scale, Calendar, BookOpen, ChevronRight, Hash } from 'lucide-react';
+import { BookmarkButton } from '@/components/bookmarks/BookmarkButton';
 
-export function SearchResults() {
-  const t = useTranslations('search.results');
-  const {
-    results,
-    totalResults,
-    currentPage,
-    resultsPerPage,
-    viewMode,
-    sortBy,
-    setSortBy,
-    setCurrentPage,
-    setResultsPerPage
-  } = useSearchStore();
+interface SearchResultsProps {
+  results: any[];
+  query: string;
+  searchType?: string;
+}
 
-  const [showExportDialog, setShowExportDialog] = useState(false);
-  const [selectedResults, setSelectedResults] = useState<string[]>([]);
-
-  const sortOptions = [
-    { value: 'relevance', label: t('sort.relevance') },
-    { value: 'date_desc', label: t('sort.dateDesc') },
-    { value: 'date_asc', label: t('sort.dateAsc') },
-    { value: 'title', label: t('sort.title') }
-  ];
-
-  const handleSelectResult = (id: string) => {
-    setSelectedResults(prev =>
-      prev.includes(id)
-        ? prev.filter(r => r !== id)
-        : [...prev, id]
+export function SearchResults({ results, query, searchType }: SearchResultsProps) {
+  if (results.length === 0) {
+    return (
+      <Card className="p-12 bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-200 mb-4">
+            <FileText className="h-8 w-8 text-slate-500" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2 text-slate-900">No Results Found</h3>
+          <p className="text-slate-600 max-w-md mx-auto">
+            No documents found for <span className="font-medium text-slate-900">"{query}"</span>.
+            Try different keywords or adjust your filters.
+          </p>
+        </div>
+      </Card>
     );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedResults.length === results.length) {
-      setSelectedResults([]);
-    } else {
-      setSelectedResults(results.map(r => r.id));
-    }
-  };
-
-  const totalPages = Math.ceil(totalResults / resultsPerPage);
+  }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Results Header */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            {t('showing', {
-              start: (currentPage - 1) * resultsPerPage + 1,
-              end: Math.min(currentPage * resultsPerPage, totalResults),
-              total: totalResults
-            })}
-          </span>
-          {selectedResults.length > 0 && (
-            <span className="text-sm font-medium text-blue-600">
-              {t('selected', { count: selectedResults.length })}
-            </span>
-          )}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pb-4 border-b border-slate-200">
+        <div>
+          <p className="text-sm text-slate-600">
+            Found <span className="font-semibold text-slate-900">{results.length}</span> result{results.length !== 1 ? 's' : ''} for
+          </p>
+          <p className="text-lg font-medium text-slate-900 mt-0.5">"{query}"</p>
         </div>
-
-        <div className="flex items-center gap-3">
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-2">
-            <SortAsc className="h-4 w-4 text-gray-500" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'relevance' | 'date_desc' | 'date_asc' | 'title')}
-              className="text-sm border rounded-lg px-2 py-1 dark:bg-gray-800"
-            >
-              {sortOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+        {searchType && (
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm font-medium">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            {searchType} search
           </div>
-
-          {/* Results per page */}
-          <select
-            value={resultsPerPage}
-            onChange={(e) => setResultsPerPage(Number(e.target.value))}
-            className="text-sm border rounded-lg px-2 py-1 dark:bg-gray-800"
-          >
-            <option value="10">10 {t('perPage')}</option>
-            <option value="20">20 {t('perPage')}</option>
-            <option value="50">50 {t('perPage')}</option>
-            <option value="100">100 {t('perPage')}</option>
-          </select>
-
-          {/* Export Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowExportDialog(true)}
-            disabled={selectedResults.length === 0 && results.length === 0}
-          >
-            <Download className="h-4 w-4 mr-1" />
-            {t('export')}
-          </Button>
-        </div>
+        )}
       </div>
 
-      {/* Select All Checkbox */}
-      {results.length > 0 && (
-        <div className="mb-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={selectedResults.length === results.length}
-              onChange={handleSelectAll}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="text-sm">{t('selectAll')}</span>
-          </label>
-        </div>
-      )}
+      {/* Results List */}
+      <div className="space-y-4">
+        {results.map((result, index) => (
+          <Card
+            key={index}
+            className="group relative overflow-hidden border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 bg-white"
+          >
+            {/* Gradient Accent Bar */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-      {/* Results Grid or List */}
-      <div className={
-        viewMode === 'grid'
-          ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
-          : 'space-y-4'
-      }>
-        {results.map(result => (
-          <ResultCard
-            key={result.id}
-            result={result}
-            viewMode={viewMode}
-            selected={selectedResults.includes(result.id)}
-            onSelect={() => handleSelectResult(result.id)}
-          />
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex justify-between items-start gap-4 mb-4">
+                <div className="flex-1">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1">
+                      <Scale className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
+                        {result.title}
+                      </h3>
+                      {result.chunk_id && (
+                        <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                          <Hash className="h-3 w-3" />
+                          {result.chunk_id}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <BookmarkButton
+                  item={{
+                    itemId: String(result.id || `search-${index}`),
+                    bookmarkType: 'search_result',
+                    title: result.title,
+                    excerpt: result.excerpt || result.snippet || '',
+                    category: result.category,
+                    section: result.section,
+                    year: result.year,
+                    url: result.url || `/laws/${result.id}`
+                  }}
+                  size="sm"
+                />
+              </div>
+
+              {/* Excerpt */}
+              <div className="mb-4 pl-8">
+                <p className="text-sm text-slate-700 leading-relaxed line-clamp-3">
+                  {result.excerpt || result.text || 'No excerpt available'}
+                </p>
+              </div>
+
+              {/* Metadata Tags */}
+              <div className="flex flex-wrap gap-2 pl-8">
+                {result.category && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-50 border border-purple-200 text-purple-700 rounded-full text-xs font-medium">
+                    <BookOpen className="h-3 w-3" />
+                    {result.category}
+                  </div>
+                )}
+                {result.year && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-full text-xs font-medium">
+                    <Calendar className="h-3 w-3" />
+                    {result.year}
+                  </div>
+                )}
+                {result.section && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-xs font-medium">
+                    <FileText className="h-3 w-3" />
+                    {result.section}
+                  </div>
+                )}
+              </div>
+
+              {/* View Details Link */}
+              <div className="mt-4 pl-8">
+                <button className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium group/link">
+                  View full text
+                  <ChevronRight className="h-4 w-4 transition-transform group-hover/link:translate-x-0.5" />
+                </button>
+              </div>
+            </div>
+          </Card>
         ))}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-8">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </div>
-      )}
-
-      {/* Export Dialog */}
-      {showExportDialog && (
-        <ExportDialog
-          selectedResults={selectedResults.length > 0 ? selectedResults : results.map(r => r.id)}
-          onClose={() => setShowExportDialog(false)}
-        />
-      )}
     </div>
   );
 }

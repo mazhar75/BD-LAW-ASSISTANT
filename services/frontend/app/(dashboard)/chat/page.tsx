@@ -8,6 +8,7 @@ import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { ragApi } from '@/lib/api/rag';
 import { useToast } from '@/components/providers/ToastProvider';
+import { BookmarkButton } from '@/components/bookmarks/BookmarkButton';
 
 interface Message {
   id: string;
@@ -158,9 +159,23 @@ export default function ChatPage() {
                     >
                       <p className="whitespace-pre-wrap">{message.content}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {formatTime(message.timestamp)}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-muted-foreground">
+                        {formatTime(message.timestamp)}
+                      </p>
+                      {message.role === 'assistant' && (
+                        <BookmarkButton
+                          item={{
+                            itemId: message.id,
+                            bookmarkType: 'chat_citation',
+                            title: 'Legal Q&A Response',
+                            excerpt: message.content.substring(0, 200),
+                            url: `/chat/${message.id}`
+                          }}
+                          size="sm"
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

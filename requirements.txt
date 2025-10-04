@@ -16,6 +16,7 @@ pydantic==2.5.2
 pydantic-settings==2.1.0
 
 # Task Queue & Scheduling
+
 celery==5.3.4
 schedule==1.2.0
 apscheduler==3.10.4

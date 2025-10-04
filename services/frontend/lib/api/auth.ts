@@ -5,27 +5,38 @@ export const authApi = {
   // Login user
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     try {
-      console.log('authApi.login called with:', credentials);
-      console.log('Gateway URL:', gatewayClient.defaults.baseURL);
-
       const response = await gatewayClient.post<LoginResponse>(
         '/api/auth/login',
         credentials
       );
 
-      console.log('Login API response:', response);
       const data = response.data;
 
       // Store tokens
       if (data.accessToken && data.refreshToken) {
-        console.log('Storing tokens...');
         tokenManager.setTokens(data.accessToken, data.refreshToken);
+
+        // Also set cookies via server API to ensure middleware can access them
+        try {
+          await fetch('/api/auth/set-cookies', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              accessToken: data.accessToken,
+              refreshToken: data.refreshToken,
+            }),
+          });
+        } catch (cookieError) {
+          console.error('Failed to set server-side cookies:', cookieError);
+        }
       }
 
       return data;
     } catch (error) {
-      console.error('Login API error:', error);
-      throw error; // Preserve the original error structure
+      throw error;
     }
   },
 

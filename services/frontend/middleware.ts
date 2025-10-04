@@ -16,7 +16,14 @@ const protectedPaths = [
   '/dashboard',
   '/profile',
   '/settings',
-  '/chat'
+  '/chat',
+  '/search',
+  '/bookmarks',
+  '/activity',
+  '/usage',
+  '/analytics',
+  '/documents',
+  '/help'
 ];
 
 export function middleware(request: NextRequest) {
