@@ -2,6 +2,10 @@
 
 AI-powered legal information system for Bangladesh providing intelligent search and question-answering across 300+ laws with 29,000+ indexed document chunks.
 
+## 🎥 Project Overview
+
+[![Watch Demo](https://img.shields.io/badge/YouTube-Watch_Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/J4U9owcqtTg)
+
 ## ✨ Key Features
 
 - **AI-Powered Legal Search** - Semantic search across Bangladesh laws
@@ -221,8 +225,6 @@ public.law_chunks (id, law_id, chunk_text, embedding, ...)
 - [Gateway README](services/gateway/README.md)
 - [RAG Service README](services/rag_service/README.md)
 - [Scraper README](services/scraper/README.md)
-- [Architecture Summary](ARCHITECTURE_SUMMARY.md)
-- [Documentation Index](DOCUMENTATION_INDEX.md)
 
 ## 🧪 Testing
 
